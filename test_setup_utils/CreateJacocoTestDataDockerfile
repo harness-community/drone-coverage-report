@@ -1,0 +1,23 @@
+FROM alpine:latest
+
+RUN apk update && \
+    apk add --no-cache git bash curl openjdk8
+
+ARG DWPJA2
+
+ENV DWPJA2=${DWPJA2}
+
+RUN mkdir -p $DWPJA2
+
+COPY create_game_of_life_jacoco_test_reports.sh /usr/local/bin/create_game_of_life_jacoco_test_reports.sh
+
+RUN chmod +x /usr/local/bin/create_game_of_life_jacoco_test_reports.sh
+
+RUN /usr/local/bin/create_game_of_life_jacoco_test_reports.sh
+
+# this is docker entry point
+COPY step_1_create_jacoco_test_data.sh /usr/local/bin/step_1_create_jacoco_test_data.sh
+
+RUN chmod +x /usr/local/bin/step_1_create_jacoco_test_data.sh
+
+ENTRYPOINT ["/usr/local/bin/step_1_create_jacoco_test_data.sh"]

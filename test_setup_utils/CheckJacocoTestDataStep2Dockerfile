@@ -6,10 +6,10 @@ RUN apk update && \
     apk add --no-cache git bash curl openjdk8
 
 # Copy the run2.sh script to serve as entry point
-COPY run2.sh /usr/local/bin/run2.sh
+COPY run2.sh /usr/local/bin/check_step_2_data.sh
 
 # Make run2.sh executable
-RUN chmod +x /usr/local/bin/run2.sh
+RUN chmod +x /usr/local/bin/check_step_2_data.sh
 
 # Set run2.sh as the entry point for the container
-ENTRYPOINT ["/usr/local/bin/run2.sh"]
+ENTRYPOINT ["/usr/local/bin/check_step_2_data.sh"]
