@@ -4,8 +4,8 @@ import (
 	"encoding/xml"
 	"fmt"
 	plg "github.com/harness-community/drone-coverage-report/plugin/plugin_defs"
+	"github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"os"
 )
 
@@ -41,7 +41,7 @@ func ParsePercentage(percentage string) float64 {
 	var value float64
 	_, err := fmt.Sscanf(percentage, "%f", &value)
 	if err != nil {
-		log.Fatalf("Error parsing percentage: %v", err)
+		logrus.Fatalf("Error parsing percentage: %v", err)
 	}
 	return value
 }
@@ -86,19 +86,19 @@ func CalculateCoverageMetrics(report Report) JacocoCoverageThresholds {
 func ParseXMLReport(filename string) Report {
 	file, err := os.Open(filename)
 	if err != nil {
-		log.Fatalf("Error opening XML file: %v", err)
+		logrus.Fatalf("Error opening XML file: %v", err)
 	}
 	defer file.Close()
 
 	data, err := io.ReadAll(file)
 	if err != nil {
-		log.Fatalf("Error reading XML file: %v", err)
+		logrus.Fatalf("Error reading XML file: %v", err)
 	}
 
 	var report Report
 	err = xml.Unmarshal(data, &report)
 	if err != nil {
-		log.Fatalf("Error unmarshalling XML: %v", err)
+		logrus.Fatalf("Error unmarshalling XML: %v", err)
 	}
 	return report
 }

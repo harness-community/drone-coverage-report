@@ -12,10 +12,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/sirupsen/logrus"
+
 	// "github.com/harness-community/drone-coverage-report/plugin"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -61,7 +62,7 @@ func LogPrintln(p Plugin, args ...interface{}) {
 		}
 	}
 
-	log.Println(append([]interface{}{"Plugin Info:"}, args...)...)
+	logrus.Println(append([]interface{}{"Plugin Info:"}, args...)...)
 }
 
 func LogPrintf(p Plugin, format string, v ...interface{}) {
@@ -75,7 +76,7 @@ func LogPrintf(p Plugin, format string, v ...interface{}) {
 			return
 		}
 	}
-	log.Printf(format, v...)
+	logrus.Printf(format, v...)
 }
 
 func IsDirExists(dir string) (bool, error) {
@@ -109,7 +110,6 @@ func GetAllJacocoExecFilesFromGlobPattern(rootDir, globPatterns string) ([]PathW
 			}
 			execFilesPathWithPrefixList = append(execFilesPathWithPrefixList, execFilesPathWithPrefix)
 		}
-
 	}
 
 	return execFilesPathWithPrefixList, nil
