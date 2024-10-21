@@ -6,9 +6,9 @@ package main
 
 import (
 	"context"
-
 	"github.com/harness-community/drone-coverage-report/plugin"
 
+	pd "github.com/harness-community/drone-coverage-report/plugin/plugin_defs"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
 )
@@ -16,7 +16,7 @@ import (
 func main() {
 	logrus.SetFormatter(new(formatter))
 
-	var args plugin.Args
+	var args pd.Args
 	if err := envconfig.Process("", &args); err != nil {
 		logrus.Fatalln(err)
 	}

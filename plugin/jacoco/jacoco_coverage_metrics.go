@@ -1,8 +1,9 @@
-package plugin
+package jacoco
 
 import (
 	"encoding/xml"
 	"fmt"
+	plg "github.com/harness-community/drone-coverage-report/plugin/plugin_defs"
 	"io"
 	"log"
 	"os"
@@ -23,24 +24,6 @@ type Counter struct {
 type Package struct {
 	Name     string    `xml:"name,attr"`
 	Counters []Counter `xml:"counter"`
-}
-
-type JacocoCoverageThresholds struct {
-	InstructionCoverageThreshold string
-	BranchCoverageThreshold      string
-	LineCoverageThreshold        string
-	ComplexityCoverageThreshold  int
-	MethodCoverageThreshold      string
-	ClassCoverageThreshold       string
-}
-
-type JacocoCoverageThresholdsValues struct {
-	InstructionCoverageThreshold float64
-	BranchCoverageThreshold      float64
-	LineCoverageThreshold        float64
-	ComplexityCoverageThreshold  int
-	MethodCoverageThreshold      float64
-	ClassCoverageThreshold       float64
 }
 
 func (j *JacocoCoverageThresholds) ToFloat64() JacocoCoverageThresholdsValues {
@@ -124,13 +107,13 @@ func GetJacocoCoverageThresholds(completeXmlPath string) JacocoCoverageThreshold
 	report := ParseXMLReport(completeXmlPath)
 	coverageThresholds := CalculateCoverageMetrics(report)
 
-	LogPrintf(nil, "Coverage Metrics:")
-	LogPrintf(nil, "Instruction Coverage: %s\n", coverageThresholds.InstructionCoverageThreshold)
-	LogPrintf(nil, "Branch Coverage: %s\n", coverageThresholds.BranchCoverageThreshold)
-	LogPrintf(nil, "Line Coverage: %s\n", coverageThresholds.LineCoverageThreshold)
-	LogPrintf(nil, "Complexity Coverage: %d\n", coverageThresholds.ComplexityCoverageThreshold)
-	LogPrintf(nil, "Method Coverage: %s\n", coverageThresholds.MethodCoverageThreshold)
-	LogPrintf(nil, "Class Coverage: %s\n", coverageThresholds.ClassCoverageThreshold)
+	plg.LogPrintf(nil, "Coverage Metrics:")
+	plg.LogPrintf(nil, "Instruction Coverage: %s\n", coverageThresholds.InstructionCoverageThreshold)
+	plg.LogPrintf(nil, "Branch Coverage: %s\n", coverageThresholds.BranchCoverageThreshold)
+	plg.LogPrintf(nil, "Line Coverage: %s\n", coverageThresholds.LineCoverageThreshold)
+	plg.LogPrintf(nil, "Complexity Coverage: %d\n", coverageThresholds.ComplexityCoverageThreshold)
+	plg.LogPrintf(nil, "Method Coverage: %s\n", coverageThresholds.MethodCoverageThreshold)
+	plg.LogPrintf(nil, "Class Coverage: %s\n", coverageThresholds.ClassCoverageThreshold)
 
 	coverageThresholdValues := coverageThresholds.ToFloat64()
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Blue Oak Model License
 // that can be found in the LICENSE file.
 
-package plugin
+package plugin_defs
 
 import (
 	"crypto/rand"
@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bmatcuk/doublestar/v4"
+	// "github.com/harness-community/drone-coverage-report/plugin"
 	"io"
 	"io/ioutil"
 	"log"

@@ -1,15 +1,25 @@
-package plugin
+package jacoco
 
 import (
 	"fmt"
+	pd "github.com/harness-community/drone-coverage-report/plugin/plugin_defs"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 )
 
+type JacocoPluginOutputVariables struct {
+	InstructionCoverage string `json:"INSTRUCTION_COVERAGE"`
+	BranchCoverage      string `json:"BRANCH_COVERAGE"`
+	LineCoverage        string `json:"LINE_COVERAGE"`
+	ComplexityCoverage  int    `json:"COMPLEXITY_COVERAGE"`
+	MethodCoverage      string `json:"METHOD_COVERAGE"`
+	ClassCoverage       string `json:"CLASS_COVERAGE"`
+}
+
 type JacocoPlugin struct {
-	CoveragePluginArgs
+	pd.CoveragePluginArgs
 	JacocoPluginParams
 	JacocoPluginStateStore
 }
@@ -17,13 +27,13 @@ type JacocoPlugin struct {
 type JacocoPluginStateStore struct {
 	BuildRootPath string
 
-	ExecFilePathsWithPrefixList []PathWithPrefix
+	ExecFilePathsWithPrefixList []pd.PathWithPrefix
 
-	ClassesInfoStoreList []FilesInfoStore
-	FinalizedClassesList []IncludeExcludesMerged
+	ClassesInfoStoreList []pd.FilesInfoStore
+	FinalizedClassesList []pd.IncludeExcludesMerged
 
-	SourcesInfoStoreList []FilesInfoStore
-	FinalizedSourcesList []IncludeExcludesMerged
+	SourcesInfoStoreList []pd.FilesInfoStore
+	FinalizedSourcesList []pd.IncludeExcludesMerged
 
 	JacocoWorkSpaceDir         string
 	ExecFilesFinalCompletePath []string
@@ -52,34 +62,43 @@ type JacocoPluginParams struct {
 	MinimumClassCoverage       float64 `envconfig:"PLUGIN_THRESHOLD_CLASS"`
 }
 
-type JacocoPluginOutputVariables struct {
-	InstructionCoverage string `json:"INSTRUCTION_COVERAGE"`
-	BranchCoverage      string `json:"BRANCH_COVERAGE"`
-	LineCoverage        string `json:"LINE_COVERAGE"`
-	ComplexityCoverage  int    `json:"COMPLEXITY_COVERAGE"`
-	MethodCoverage      string `json:"METHOD_COVERAGE"`
-	ClassCoverage       string `json:"CLASS_COVERAGE"`
+type JacocoCoverageThresholds struct {
+	InstructionCoverageThreshold string
+	BranchCoverageThreshold      string
+	LineCoverageThreshold        string
+	ComplexityCoverageThreshold  int
+	MethodCoverageThreshold      string
+	ClassCoverageThreshold       string
 }
 
-func (p *JacocoPlugin) Init(args Args) error {
+type JacocoCoverageThresholdsValues struct {
+	InstructionCoverageThreshold float64
+	BranchCoverageThreshold      float64
+	LineCoverageThreshold        float64
+	ComplexityCoverageThreshold  int
+	MethodCoverageThreshold      float64
+	ClassCoverageThreshold       float64
+}
 
-	LogPrintln(p, "JacocoPlugin Init")
+func (p *JacocoPlugin) Init(args pd.Args) error {
+
+	pd.LogPrintln(p, "JacocoPlugin Init")
 
 	err := p.SetBuildRoot("")
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in Init: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in Init: "+err.Error())
 		return err
 	}
 
 	err = p.CreateNewWorkspace()
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in Init: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in Init: "+err.Error())
 		return err
 	}
 
 	err = p.SetJarPath()
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in Init: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in Init: "+err.Error())
 		return err
 	}
 
@@ -104,8 +123,8 @@ func (p *JacocoPlugin) SetJarPath() error {
 
 	_, err := os.Stat(p.JacocoJarPath)
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in SetJarPath: "+err.Error())
-		return GetNewError("Error in SetJarPath: " + err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in SetJarPath: "+err.Error())
+		return pd.GetNewError("Error in SetJarPath: " + err.Error())
 	}
 
 	return nil
@@ -115,21 +134,21 @@ func (p *JacocoPlugin) CreateNewWorkspace() error {
 
 	jacocoWorkSpaceDir, err := p.GetBuildRootPath()
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in CopyClassesToWorkspace: "+err.Error())
-		return GetNewError("Error in CopyClassesToWorkspace: " + err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in CopyClassesToWorkspace: "+err.Error())
+		return pd.GetNewError("Error in CopyClassesToWorkspace: " + err.Error())
 	}
 
 	p.JacocoWorkSpaceDir = jacocoWorkSpaceDir
 
-	err = CreateDir(p.JacocoWorkSpaceDir)
+	err = pd.CreateDir(p.JacocoWorkSpaceDir)
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in Init: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in Init: "+err.Error())
 		return err
 	}
 
-	err = CreateDir(p.GetOutputReportsWorkSpaceDir())
+	err = pd.CreateDir(p.GetOutputReportsWorkSpaceDir())
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in Init: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in Init: "+err.Error())
 		return err
 	}
 
@@ -137,7 +156,7 @@ func (p *JacocoPlugin) CreateNewWorkspace() error {
 }
 
 func (p *JacocoPlugin) GetWorkspaceDir() string {
-	p.JacocoWorkSpaceDir = os.Getenv(DefaultWorkSpaceDirEnvVarKey)
+	p.JacocoWorkSpaceDir = os.Getenv(pd.DefaultWorkSpaceDirEnvVarKey)
 	return p.JacocoWorkSpaceDir
 }
 
@@ -167,8 +186,8 @@ func (p *JacocoPlugin) GetBuildRootPath() (string, error) {
 	buildRootPath := os.Getenv(BuildRootPathKeyStr)
 
 	if buildRootPath == "" {
-		LogPrintln(p, "JacocoPlugin Error in GetBuildRootPath: Build root path is empty")
-		return "", GetNewError("Error in GetBuildRootPath: Build")
+		pd.LogPrintln(p, "JacocoPlugin Error in GetBuildRootPath: Build root path is empty")
+		return "", pd.GetNewError("Error in GetBuildRootPath: Build")
 	}
 
 	return buildRootPath, nil
@@ -181,21 +200,21 @@ func (p *JacocoPlugin) SetBuildRoot(buildRootPath string) error {
 	if buildRootPath == "" {
 		buildRootPath, err = p.GetBuildRootPath()
 		if err != nil {
-			LogPrintln(p, "JacocoPlugin Error in SetBuildRoot: "+err.Error())
+			pd.LogPrintln(p, "JacocoPlugin Error in SetBuildRoot: "+err.Error())
 			return err
 		}
 	}
 
-	ok, err := IsDirExists(buildRootPath)
+	ok, err := pd.IsDirExists(buildRootPath)
 
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in SetBuildRoot: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in SetBuildRoot: "+err.Error())
 		return err
 	}
 
 	if !ok {
-		LogPrintln(p, "JacocoPlugin Error in SetBuildRoot: Build root path does not exist")
-		return GetNewError("Error in SetBuildRoot: Build root path does not exist")
+		pd.LogPrintln(p, "JacocoPlugin Error in SetBuildRoot: Build root path does not exist")
+		return pd.GetNewError("Error in SetBuildRoot: Build root path does not exist")
 	}
 
 	p.BuildRootPath = buildRootPath
@@ -203,60 +222,60 @@ func (p *JacocoPlugin) SetBuildRoot(buildRootPath string) error {
 }
 
 func (p *JacocoPlugin) DeInit() error {
-	LogPrintln(p, "JacocoPlugin DeInit")
+	pd.LogPrintln(p, "JacocoPlugin DeInit")
 	return nil
 }
 
-func (p *JacocoPlugin) ValidateAndProcessArgs(args Args) error {
-	LogPrintln(p, "JacocoPlugin BuildAndValidateArgs")
+func (p *JacocoPlugin) ValidateAndProcessArgs(args pd.Args) error {
+	pd.LogPrintln(p, "JacocoPlugin BuildAndValidateArgs")
 
 	err := p.IsExecFileArgOk(args)
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in ValidateAndProcessArgs: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in ValidateAndProcessArgs: "+err.Error())
 		return err
 	}
 
 	err = p.IsClassArgOk(args)
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in ValidateAndProcessArgs: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in ValidateAndProcessArgs: "+err.Error())
 		return err
 	}
 
 	err = p.IsSourceArgOk(args)
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in ValidateAndProcessArgs: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in ValidateAndProcessArgs: "+err.Error())
 		return err
 	}
 
 	return nil
 }
 
-func (p *JacocoPlugin) GetClassesList() []IncludeExcludesMerged {
+func (p *JacocoPlugin) GetClassesList() []pd.IncludeExcludesMerged {
 	return p.FinalizedClassesList
 }
 
-func (p *JacocoPlugin) GetSourcesList() []IncludeExcludesMerged {
+func (p *JacocoPlugin) GetSourcesList() []pd.IncludeExcludesMerged {
 	return p.FinalizedSourcesList
 }
 
-func (p *JacocoPlugin) DoPostArgsValidationSetup(args Args) error {
-	LogPrintln(p, "JacocoPlugin DoPostArgsValidationSetup")
+func (p *JacocoPlugin) DoPostArgsValidationSetup(args pd.Args) error {
+	pd.LogPrintln(p, "JacocoPlugin DoPostArgsValidationSetup")
 
 	err := p.CopyClassesToWorkspace()
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in DoPostArgsValidationSetup: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in DoPostArgsValidationSetup: "+err.Error())
 		return err
 	}
 
 	err = p.CopySourcesToWorkspace()
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in DoPostArgsValidationSetup: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in DoPostArgsValidationSetup: "+err.Error())
 		return err
 	}
 
 	err = p.CopyJacocoExecFilesToWorkspace()
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in DoPostArgsValidationSetup: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in DoPostArgsValidationSetup: "+err.Error())
 		return err
 	}
 
@@ -282,24 +301,24 @@ func (p *JacocoPlugin) GetSourcesWorkSpaceDir() string {
 func (p *JacocoPlugin) CopyJacocoExecFilesToWorkspace() error {
 	uniqueDirs, err := p.GetJacocoExecFilesUniqueDirs()
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in CopyJacocoExecFilesToWorkspace: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in CopyJacocoExecFilesToWorkspace: "+err.Error())
 		return err
 	}
 
 	execFilesDir := p.GetExecFilesWorkSpaceDir()
-	LogPrintln(p, "JacocoPlugin Copying Exec files to workspace: "+execFilesDir)
-	err = CreateDir(execFilesDir)
+	pd.LogPrintln(p, "JacocoPlugin Copying Exec files to workspace: "+execFilesDir)
+	err = pd.CreateDir(execFilesDir)
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in CopyJacocoExecFilesToWorkspace: "+err.Error())
-		return GetNewError("Error in CopyJacocoExecFilesToWorkspace: " + err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in CopyJacocoExecFilesToWorkspace: "+err.Error())
+		return pd.GetNewError("Error in CopyJacocoExecFilesToWorkspace: " + err.Error())
 	}
 
 	for _, dir := range uniqueDirs {
 		newDir := filepath.Join(execFilesDir, dir)
-		err = CreateDir(newDir)
+		err = pd.CreateDir(newDir)
 		if err != nil {
-			LogPrintln(p, "JacocoPlugin Error in CopyJacocoExecFilesToWorkspace: "+err.Error())
-			return GetNewError("Error in CopyJacocoExecFilesToWorkspace: " + err.Error())
+			pd.LogPrintln(p, "JacocoPlugin Error in CopyJacocoExecFilesToWorkspace: "+err.Error())
+			return pd.GetNewError("Error in CopyJacocoExecFilesToWorkspace: " + err.Error())
 		}
 	}
 
@@ -307,10 +326,10 @@ func (p *JacocoPlugin) CopyJacocoExecFilesToWorkspace() error {
 		relPath := execFilePathsWithPrefix.RelativePath
 		srcFilePath := filepath.Join(execFilePathsWithPrefix.CompletePathPrefix, execFilePathsWithPrefix.RelativePath)
 		dstFilePath := filepath.Join(execFilesDir, relPath)
-		err = CopyFile(srcFilePath, dstFilePath)
+		err = pd.CopyFile(srcFilePath, dstFilePath)
 		if err != nil {
-			LogPrintln(p, "JacocoPlugin Error in CopyJacocoExecFilesToWorkspace: "+err.Error())
-			return GetNewError("Error in CopyJacocoExecFilesToWorkspace: " + err.Error())
+			pd.LogPrintln(p, "JacocoPlugin Error in CopyJacocoExecFilesToWorkspace: "+err.Error())
+			return pd.GetNewError("Error in CopyJacocoExecFilesToWorkspace: " + err.Error())
 		}
 
 		p.ExecFilesFinalCompletePath = append(p.ExecFilesFinalCompletePath, dstFilePath)
@@ -341,17 +360,17 @@ func (p *JacocoPlugin) CopyClassesToWorkspace() error {
 
 	classesList := p.GetClassesList()
 	if len(classesList) < 1 {
-		LogPrintln(p, "JacocoPlugin Error in CopyClassesToWorkspace: No class files to copy")
-		return GetNewError("Error in CopyClassesToWorkspace: No class files to copy")
+		pd.LogPrintln(p, "JacocoPlugin Error in CopyClassesToWorkspace: No class files to copy")
+		return pd.GetNewError("Error in CopyClassesToWorkspace: No class files to copy")
 	}
 
 	dstClassesDir := p.GetClassesWorkSpaceDir()
-	LogPrintln(p, "JacocoPlugin Copying classes to workspace: "+dstClassesDir)
+	pd.LogPrintln(p, "JacocoPlugin Copying classes to workspace: "+dstClassesDir)
 
-	err := CreateDir(dstClassesDir)
+	err := pd.CreateDir(dstClassesDir)
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in CopyClassesToWorkspace: "+err.Error())
-		return GetNewError("Error in CopyClassesToWorkspace: " + err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in CopyClassesToWorkspace: "+err.Error())
+		return pd.GetNewError("Error in CopyClassesToWorkspace: " + err.Error())
 	}
 
 	for _, classInfo := range classesList {
@@ -368,16 +387,16 @@ func (p *JacocoPlugin) CopyClassesToWorkspace() error {
 func (p *JacocoPlugin) CopySourcesToWorkspace() error {
 
 	if p.SkipCopyOfSrcFiles {
-		LogPrintln(p, "JacocoPlugin Skipping copying of source files")
+		pd.LogPrintln(p, "JacocoPlugin Skipping copying of source files")
 		return nil
 	}
 
 	dstSourcesDir := p.GetSourcesWorkSpaceDir()
-	LogPrintln(p, "JacocoPlugin Copying sources to workspace: "+dstSourcesDir)
-	err := CreateDir(dstSourcesDir)
+	pd.LogPrintln(p, "JacocoPlugin Copying sources to workspace: "+dstSourcesDir)
+	err := pd.CreateDir(dstSourcesDir)
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in CopySourcesToWorkspace: "+err.Error())
-		return GetNewError("Error in CopySourcesToWorkspace: " + err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in CopySourcesToWorkspace: "+err.Error())
+		return pd.GetNewError("Error in CopySourcesToWorkspace: " + err.Error())
 	}
 
 	sourcesList := p.GetSourcesList()
@@ -392,99 +411,99 @@ func (p *JacocoPlugin) CopySourcesToWorkspace() error {
 }
 
 func (p *JacocoPlugin) GetClassPatternsStrArray() []string {
-	return ToStringArrayFromCsvString(p.ClassPatterns)
+	return pd.ToStringArrayFromCsvString(p.ClassPatterns)
 }
 
 func (p *JacocoPlugin) GetSourcePatternsStrArray() []string {
-	return ToStringArrayFromCsvString(p.SourcePattern)
+	return pd.ToStringArrayFromCsvString(p.SourcePattern)
 }
 
-func (p *JacocoPlugin) IsSourceArgOk(args Args) error {
-	LogPrintln(p, "JacocoPlugin BuildAndValidateArgs")
+func (p *JacocoPlugin) IsSourceArgOk(args pd.Args) error {
+	pd.LogPrintln(p, "JacocoPlugin BuildAndValidateArgs")
 
 	if p.SkipCopyOfSrcFiles {
-		LogPrintln(p, "JacocoPlugin Skipping copying of source files")
+		pd.LogPrintln(p, "JacocoPlugin Skipping copying of source files")
 		return nil
 	}
 
 	if args.SourcePattern == "" {
-		return GetNewError("Error in IsSourceArgOk: SourcePattern is empty")
+		return pd.GetNewError("Error in IsSourceArgOk: SourcePattern is empty")
 	}
 	p.SourcePattern = args.SourcePattern
 	p.SourceInclusionPattern = args.SourceInclusionPattern
 	p.SourceExclusionPattern = args.SourceExclusionPattern
 
 	sourcesInfoStoreList, err :=
-		FilterFileOrDirUsingGlobPatterns(p.BuildRootPath, p.GetSourcePatternsStrArray(),
+		pd.FilterFileOrDirUsingGlobPatterns(p.BuildRootPath, p.GetSourcePatternsStrArray(),
 			p.SourceInclusionPattern, p.SourceExclusionPattern, AllSourcesAutoFillGlob)
 
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in IsSourceArgOk: "+err.Error())
-		return GetNewError("Error in IsSourceArgOk: " + err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in IsSourceArgOk: "+err.Error())
+		return pd.GetNewError("Error in IsSourceArgOk: " + err.Error())
 	}
 
 	p.SourcesInfoStoreList = sourcesInfoStoreList
-	p.FinalizedSourcesList = MergeIncludeExcludeFileCompletePaths(p.SourcesInfoStoreList)
+	p.FinalizedSourcesList = pd.MergeIncludeExcludeFileCompletePaths(p.SourcesInfoStoreList)
 
 	return nil
 
 }
 
-func (p *JacocoPlugin) IsClassArgOk(args Args) error {
+func (p *JacocoPlugin) IsClassArgOk(args pd.Args) error {
 
-	LogPrintln(p, "JacocoPlugin BuildAndValidateArgs")
+	pd.LogPrintln(p, "JacocoPlugin BuildAndValidateArgs")
 
 	if args.ClassPatterns == "" {
-		return GetNewError("Error in IsClassArgOk: ClassPatterns is empty")
+		return pd.GetNewError("Error in IsClassArgOk: ClassPatterns is empty")
 	}
 	p.ClassPatterns = args.ClassPatterns
 	p.ClassInclusionPatterns = args.ClassInclusionPatterns
 	p.ClassExclusionPatterns = args.ClassExclusionPatterns
 
 	classesInfoStoreList, err :=
-		FilterFileOrDirUsingGlobPatterns(p.BuildRootPath, p.GetClassPatternsStrArray(),
+		pd.FilterFileOrDirUsingGlobPatterns(p.BuildRootPath, p.GetClassPatternsStrArray(),
 			p.ClassInclusionPatterns, p.ClassExclusionPatterns, AllClassesAutoFillGlob)
 
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in IsClassArgOk: "+err.Error())
-		return GetNewError("Error in IsClassArgOk: " + err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in IsClassArgOk: "+err.Error())
+		return pd.GetNewError("Error in IsClassArgOk: " + err.Error())
 	}
 
 	p.ClassesInfoStoreList = classesInfoStoreList
-	p.FinalizedClassesList = MergeIncludeExcludeFileCompletePaths(p.ClassesInfoStoreList)
+	p.FinalizedClassesList = pd.MergeIncludeExcludeFileCompletePaths(p.ClassesInfoStoreList)
 
 	if len(p.FinalizedClassesList) < 1 {
-		LogPrintln(p, "Error in IsClassArgOk: No class inferred from class patterns")
-		return GetNewError("Error in IsClassArgOk: No class inferred from class patterns")
+		pd.LogPrintln(p, "Error in IsClassArgOk: No class inferred from class patterns")
+		return pd.GetNewError("Error in IsClassArgOk: No class inferred from class patterns")
 	}
 	return nil
 }
 
-func (p *JacocoPlugin) IsExecFileArgOk(args Args) error {
+func (p *JacocoPlugin) IsExecFileArgOk(args pd.Args) error {
 
-	LogPrintln(p, "JacocoPlugin BuildAndValidateArgs")
+	pd.LogPrintln(p, "JacocoPlugin BuildAndValidateArgs")
 
 	if args.ExecFilesPathPattern == "" {
-		return GetNewError("Error in IsExecFileArgOk: ExecFilesPathPattern is empty")
+		return pd.GetNewError("Error in IsExecFileArgOk: ExecFilesPathPattern is empty")
 	}
 
-	execFilesPathList, err := GetAllJacocoExecFilesFromGlobPattern(p.BuildRootPath, args.ExecFilesPathPattern)
+	execFilesPathList, err := pd.GetAllJacocoExecFilesFromGlobPattern(p.BuildRootPath, args.ExecFilesPathPattern)
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in IsExecFileArgOk: "+err.Error())
-		return GetNewError("Error in IsExecFileArgOk: " + err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in IsExecFileArgOk: "+err.Error())
+		return pd.GetNewError("Error in IsExecFileArgOk: " + err.Error())
 	}
 
 	p.ExecFilePathsWithPrefixList = execFilesPathList
 
 	if len(p.ExecFilePathsWithPrefixList) < 1 {
-		LogPrintln(p, "JacocoPlugin Error in IsExecFileArgOk: No jacoco exec files found")
-		return GetNewError("Error in IsExecFileArgOk: No jacoco exec files found")
+		pd.LogPrintln(p, "JacocoPlugin Error in IsExecFileArgOk: No jacoco exec files found")
+		return pd.GetNewError("Error in IsExecFileArgOk: No jacoco exec files found")
 	}
 
 	return nil
 }
 
-func (p *JacocoPlugin) GetExecFilesList() []PathWithPrefix {
+func (p *JacocoPlugin) GetExecFilesList() []pd.PathWithPrefix {
 	return p.ExecFilePathsWithPrefixList
 }
 
@@ -499,17 +518,17 @@ java -jar jacoco.jar \
 */
 
 func (p *JacocoPlugin) Run() error {
-	LogPrintln(p, "JacocoPlugin Run")
+	pd.LogPrintln(p, "JacocoPlugin Run")
 
 	err := p.GenerateJacocoReports()
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in Run: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in Run: "+err.Error())
 		return err
 	}
 
 	err = p.AnalyzeJacocoCoverageThresholds()
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in Run: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in Run: "+err.Error())
 		return err
 	}
 
@@ -521,26 +540,26 @@ func (p *JacocoPlugin) AnalyzeJacocoCoverageThresholds() error {
 	if p.PluginFailIfNoReports {
 		_, err := os.Stat(p.GetJacocoXmlReportFilePath())
 		if err != nil {
-			LogPrintln(p, "JacocoPlugin Error in AnalyzeJacocoCoverageThresholds: "+err.Error())
-			return GetNewError("Error in AnalyzeJacocoCoverageThresholds: " + err.Error())
+			pd.LogPrintln(p, "JacocoPlugin Error in AnalyzeJacocoCoverageThresholds: "+err.Error())
+			return pd.GetNewError("Error in AnalyzeJacocoCoverageThresholds: " + err.Error())
 		}
 		_, err = os.Stat(p.GetJacocoHtmlReportFilePath())
 		if err != nil {
-			LogPrintln(p, "JacocoPlugin Error in AnalyzeJacocoCoverageThresholds: "+err.Error())
-			return GetNewError("Error in AnalyzeJacocoCoverageThresholds: " + err.Error())
+			pd.LogPrintln(p, "JacocoPlugin Error in AnalyzeJacocoCoverageThresholds: "+err.Error())
+			return pd.GetNewError("Error in AnalyzeJacocoCoverageThresholds: " + err.Error())
 		}
 	}
 
 	p.CoverageThresholds = GetJacocoCoverageThresholds(p.GetJacocoXmlReportFilePath())
 
 	if p.PluginFailOnThreshold == false {
-		LogPrintln(p, "JacocoPlugin PluginFailOnThreshold is false, so skipping threshold check")
+		pd.LogPrintln(p, "JacocoPlugin PluginFailOnThreshold is false, so skipping threshold check")
 		return nil
 	}
 
 	if p.IsThresholdValuesGood() == false {
-		LogPrintln(p, "JacocoPlugin Error in AnalyzeJacocoCoverageThresholds: Threshold values not good")
-		return GetNewError("Error in AnalyzeJacocoCoverageThresholds: Threshold values not good")
+		pd.LogPrintln(p, "JacocoPlugin Error in AnalyzeJacocoCoverageThresholds: Threshold values not good")
+		return pd.GetNewError("Error in AnalyzeJacocoCoverageThresholds: Threshold values not good")
 	}
 
 	return nil
@@ -569,7 +588,7 @@ func (p *JacocoPlugin) IsThresholdValuesGood() bool {
 
 	for _, thresholdCompare := range thresholdsCompareList {
 		if thresholdCompare.ObservedValue <= thresholdCompare.ExpectedValue {
-			LogPrintln(p, "JacocoPlugin "+thresholdCompare.ThresholdType+" threshold not met",
+			pd.LogPrintln(p, "JacocoPlugin "+thresholdCompare.ThresholdType+" threshold not met",
 				" expected = ", thresholdCompare.ExpectedValue, " observed = ", thresholdCompare.ObservedValue)
 
 			return false
@@ -577,7 +596,7 @@ func (p *JacocoPlugin) IsThresholdValuesGood() bool {
 	}
 
 	if p.CoverageThresholds.ComplexityCoverageThreshold > p.MinimumComplexityCoverage {
-		LogPrintln(p, "JacocoPlugin ComplexityCoverage threshold not met", " expected = ", p.MinimumComplexityCoverage,
+		pd.LogPrintln(p, "JacocoPlugin ComplexityCoverage threshold not met", " expected = ", p.MinimumComplexityCoverage,
 			" observed = ", p.CoverageThresholds.ComplexityCoverageThreshold)
 		return false
 	}
@@ -602,8 +621,8 @@ func (p *JacocoPlugin) GenerateJacocoReports() error {
 	args = append(args, p.GetXmlReportArgs()+" ")
 
 	cmdStr := strings.Join(args, " ")
-	LogPrintln(p, "JacocoPlugin Running command: ")
-	LogPrintln(p, cmdStr)
+	pd.LogPrintln(p, "JacocoPlugin Running command: ")
+	pd.LogPrintln(p, cmdStr)
 
 	parts := strings.Fields(cmdStr)
 
@@ -613,10 +632,10 @@ func (p *JacocoPlugin) GenerateJacocoReports() error {
 
 	err := cmd.Run()
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in Run: "+err.Error())
-		return GetNewError("Error in Run: " + err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in Run: "+err.Error())
+		return pd.GetNewError("Error in Run: " + err.Error())
 	} else {
-		LogPrintln(p, "Command executed successfully.")
+		pd.LogPrintln(p, "Command executed successfully.")
 	}
 
 	return nil
@@ -663,12 +682,12 @@ func (p *JacocoPlugin) GetJacocoHtmlReportFilePath() string {
 }
 
 func (p *JacocoPlugin) PersistResults() error {
-	LogPrintln(p, "JacocoPlugin StoreResults")
+	pd.LogPrintln(p, "JacocoPlugin StoreResults")
 	return nil
 }
 
 func (p *JacocoPlugin) WriteOutputVariables() error {
-	LogPrintln(p, "JacocoPlugin WriteOutputVariables to ", GetOutputVariablesStorageFilePath())
+	pd.LogPrintln(p, "JacocoPlugin WriteOutputVariables to ", pd.GetOutputVariablesStorageFilePath())
 
 	type EnvKvPair struct {
 		Key   string
@@ -687,19 +706,19 @@ func (p *JacocoPlugin) WriteOutputVariables() error {
 	var retErr error = nil
 
 	for _, kvPair := range kvPairs {
-		err := WriteEnvVariableAsString(kvPair.Key, kvPair.Value)
+		err := pd.WriteEnvVariableAsString(kvPair.Key, kvPair.Value)
 		if err != nil {
 			retErr = err
 		}
 	}
 
-	s, err := ReadFileAsString(GetOutputVariablesStorageFilePath())
+	s, err := pd.ReadFileAsString(pd.GetOutputVariablesStorageFilePath())
 	if err != nil {
-		LogPrintln(p, "JacocoPlugin Error in WriteOutputVariables: "+err.Error())
-		return GetNewError("Error in WriteOutputVariables: " + err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in WriteOutputVariables: "+err.Error())
+		return pd.GetNewError("Error in WriteOutputVariables: " + err.Error())
 	}
 
-	fmt.Println("\n\nReading JacocoPlugin Output Variables file ", GetOutputVariablesStorageFilePath())
+	fmt.Println("\n\nReading JacocoPlugin Output Variables file ", pd.GetOutputVariablesStorageFilePath())
 	fmt.Println(s)
 	fmt.Println("Reading Complete\n\n")
 
@@ -711,7 +730,11 @@ func (p *JacocoPlugin) IsQuiet() bool {
 }
 
 func (p *JacocoPlugin) GetPluginType() string {
-	return JacocoPluginType
+	return pd.JacocoPluginType
+}
+
+func GetNewJacocoPlugin() JacocoPlugin {
+	return JacocoPlugin{}
 }
 
 const (

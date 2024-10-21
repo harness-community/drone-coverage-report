@@ -2,6 +2,8 @@ package plugin
 
 import (
 	"context"
+	jc "github.com/harness-community/drone-coverage-report/plugin/jacoco"
+	pd "github.com/harness-community/drone-coverage-report/plugin/plugin_defs"
 	"os"
 	"strings"
 	"testing"
@@ -54,17 +56,17 @@ func CheckSourceAndClassPathsWithIncludeExcludeVariations(
 		t.Errorf("Error in TestClassPathWithIncludeExclude: %s", err.Error())
 	}
 
-	workSpaceInfoMap, err := plugin.InspectProcessArgs([]string{WorkSpaceCompletePathKeyStr})
+	workSpaceInfoMap, err := plugin.InspectProcessArgs([]string{jc.WorkSpaceCompletePathKeyStr})
 	if err != nil {
 		t.Errorf("Error in TestClassPathWithIncludeExclude: %s", err.Error())
 	}
 
-	js, err := ToJsonStringFromMap[map[string]interface{}](workSpaceInfoMap)
+	js, err := pd.ToJsonStringFromMap[map[string]interface{}](workSpaceInfoMap)
 	if err != nil {
 		t.Errorf("Error in TestClassPathWithIncludeExclude: %s", err.Error())
 	}
 
-	wsi, err := ToStructFromJsonString[WorkSpaceInfo](js)
+	wsi, err := pd.ToStructFromJsonString[WorkSpaceInfo](js)
 	if err != nil {
 		t.Errorf("Error in TestClassPathWithIncludeExclude: %s", err.Error())
 	}
@@ -101,7 +103,7 @@ func CheckFilesCopiedToWorkSpace(wsi WorkSpaceInfo, t *testing.T) {
 
 func CheckSourcePathsWithClassPaths(classPattern, classInclusionPattern, classExclusionPattern,
 	sourcePattern, sourceInclusionPattern, sourceExclusionPattern string,
-	t *testing.T) (Plugin, map[string]interface{}, error) {
+	t *testing.T) (pd.Plugin, map[string]interface{}, error) {
 
 	args := GetTestNewArgs()
 	args.ClassPatterns = classPattern
@@ -117,18 +119,18 @@ func CheckSourcePathsWithClassPaths(classPattern, classInclusionPattern, classEx
 		t.Errorf("Error in TestClassPathWithIncludeExclude: %s", err.Error())
 	}
 
-	sourcesInfo, err := plugin.InspectProcessArgs([]string{FinalizedSourcesListParamKey})
+	sourcesInfo, err := plugin.InspectProcessArgs([]string{jc.FinalizedSourcesListParamKey})
 	if err != nil {
 		t.Errorf("Error in TestClassPathWithIncludeExclude: %s", err.Error())
 	}
 	return plugin, sourcesInfo, err
 }
 
-func GetTestNewArgs() Args {
-	args := Args{
-		Pipeline:           Pipeline{},
-		CoveragePluginArgs: CoveragePluginArgs{PluginToolType: JacocoPluginType},
-		EnvPluginInputArgs: EnvPluginInputArgs{ExecFilesPathPattern: TestBuildRootPath},
+func GetTestNewArgs() pd.Args {
+	args := pd.Args{
+		Pipeline:           pd.Pipeline{},
+		CoveragePluginArgs: pd.CoveragePluginArgs{PluginToolType: pd.JacocoPluginType},
+		EnvPluginInputArgs: pd.EnvPluginInputArgs{ExecFilesPathPattern: TestBuildRootPath},
 	}
 	args.ExecFilesPathPattern = TestExecPathPattern01
 	return args
