@@ -107,3 +107,6 @@ docker run --rm \
   -v $(pwd):/drone/src \
 plugins/drone-coverage-report
 ```
+
+# Supported arch and os
+This plugin can only be run on linux amd64/arm64. Windows build not supported.
