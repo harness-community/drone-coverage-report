@@ -1,19 +1,19 @@
 # Dev testing for JDK Docker Image
 
 ```bash
-docker build --network host -t plugins/drone-coverage-report -f docker/Dockerfile.DevTest.Amd64 .
+docker build --network host -t plugins/coverage-report -f docker/Dockerfile.DevTest.Amd64 .
 ```
 
 # Production JRE support Docker Image
 
 ```bash
-docker build --network host -t plugins/drone-coverage-report -f docker/Dockerfile .
+docker build --network host -t plugins/coverage-report -f docker/Dockerfile .
 ```
 
 # Debug and Test Locally
 
 ```bash
-docker run -it -v /tmp:/tmp --entrypoint /bin/sh plugins/drone-coverage-report
+docker run -it -v /tmp:/tmp --entrypoint /bin/sh plugins/coverage-report
 ```
 
 # JDK setup for testing

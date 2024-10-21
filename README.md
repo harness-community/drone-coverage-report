@@ -43,7 +43,7 @@ step:
   identifier: jacocoSample
   spec:
     connectorRef: Docker_Hub_Anonymous
-    image: 'plugins/drone-coverage-report'
+    image: 'plugins/coverage-report'
     settings:
       tool: jacoco
       reports_path_pattern: '**/target/jacoco.exec'
@@ -75,7 +75,7 @@ scripts/build.sh
 Build the plugin image:
 
 ```text
-docker build -t plugins/drone-coverage-report -f docker/Dockerfile .
+docker build -t plugins/coverage-report -f docker/Dockerfile .
 ```
 
 # Testing
@@ -105,7 +105,7 @@ docker run --rm \
   -e PLUGIN_DRONE_WORKSPACE='/harness' \
   -w /drone/src \
   -v $(pwd):/drone/src \
-plugins/drone-coverage-report
+plugins/coverage-report
 ```
 
 # Supported arch and os
