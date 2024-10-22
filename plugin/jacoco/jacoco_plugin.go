@@ -9,15 +9,6 @@ import (
 	"strings"
 )
 
-type JacocoPluginOutputVariables struct {
-	InstructionCoverage string `json:"INSTRUCTION_COVERAGE"`
-	BranchCoverage      string `json:"BRANCH_COVERAGE"`
-	LineCoverage        string `json:"LINE_COVERAGE"`
-	ComplexityCoverage  int    `json:"COMPLEXITY_COVERAGE"`
-	MethodCoverage      string `json:"METHOD_COVERAGE"`
-	ClassCoverage       string `json:"CLASS_COVERAGE"`
-}
-
 type JacocoPlugin struct {
 	pd.CoveragePluginArgs
 	InputArgs *pd.Args

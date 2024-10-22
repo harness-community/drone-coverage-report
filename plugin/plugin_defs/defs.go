@@ -48,6 +48,15 @@ type EnvPluginInputArgs struct {
 	MinimumClassCoverage       float64 `envconfig:"PLUGIN_THRESHOLD_CLASS"`
 }
 
+type PluginOutputVariables struct {
+	InstructionCoverage string `json:"INSTRUCTION_COVERAGE"`
+	BranchCoverage      string `json:"BRANCH_COVERAGE"`
+	LineCoverage        string `json:"LINE_COVERAGE"`
+	ComplexityCoverage  int    `json:"COMPLEXITY_COVERAGE"`
+	MethodCoverage      string `json:"METHOD_COVERAGE"`
+	ClassCoverage       string `json:"CLASS_COVERAGE"`
+}
+
 const (
 	JacocoPluginType    = "jacoco"
 	JacocoXmlPluginType = "jacoco-xml"
