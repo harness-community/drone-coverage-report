@@ -1,7 +1,7 @@
 # Dev testing for JDK Docker Image
 
 ```bash
-docker build --network host -t plugins/coverage-report -f docker/Dockerfile.DevTest.Amd64 .
+docker build --network host -t plugins/coverage-report -f docker/Dockerfile.linux.amd64 .
 ```
 
 # Production JRE support Docker Image
@@ -65,7 +65,7 @@ DRONE_WORKSPACE=/opt/hns/test-resources/game-of-life-master go test -count=1 -ru
 go build && \
 \
 rm -rf /opt/hns/test-resources/game-of-life-master/jacoco-workspace--* &&
-rm /tmp/drone-output  || \
+rm /tmp/drone_output.txt  || \
 \
 PLUGIN_TOOL='jacoco' \
 PLUGIN_REPORTS_PATH_PATTERN='**/target/jacoco.exec' \

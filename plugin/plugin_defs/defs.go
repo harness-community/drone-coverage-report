@@ -1,7 +1,7 @@
 package plugin_defs
 
 type Plugin interface {
-	Init(args Args) error
+	Init(args *Args) error
 	SetBuildRoot(buildRootPath string) error
 	DeInit() error
 	ValidateAndProcessArgs(args Args) error

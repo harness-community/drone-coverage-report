@@ -31,7 +31,7 @@ func Exec(ctx context.Context, args pd.Args) (pd.Plugin, error) {
 		return plugin, err
 	}
 
-	err = plugin.Init(args)
+	err = plugin.Init(&args)
 	if err != nil {
 		return plugin, err
 	}

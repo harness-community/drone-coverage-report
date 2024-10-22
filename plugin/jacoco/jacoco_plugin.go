@@ -20,7 +20,7 @@ type JacocoPluginOutputVariables struct {
 
 type JacocoPlugin struct {
 	pd.CoveragePluginArgs
-	JacocoPluginParams
+	InputArgs *pd.Args
 	JacocoPluginStateStore
 }
 
@@ -41,27 +41,6 @@ type JacocoPluginStateStore struct {
 	CoverageThresholds         JacocoCoverageThresholdsValues
 }
 
-type JacocoPluginParams struct {
-	ExecPattern string `envconfig:"PLUGIN_REPORTS_PATH_PATTERN"`
-
-	ClassPatterns          string `envconfig:"PLUGIN_CLASS_DIRECTORIES"`
-	ClassInclusionPatterns string `envconfig:"PLUGIN_CLASS_INCLUSION_PATTERN"`
-	ClassExclusionPatterns string `envconfig:"PLUGIN_CLASS_EXCLUSION_PATTERN"`
-
-	SourcePattern          string `envconfig:"PLUGIN_SOURCE_DIRECTORIES"`
-	SourceInclusionPattern string `envconfig:"PLUGIN_SOURCE_INCLUSION_PATTERN"`
-	SourceExclusionPattern string `envconfig:"PLUGIN_SOURCE_EXCLUSION_PATTERN"`
-
-	SkipCopyOfSrcFiles bool `envconfig:"PLUGIN_SKIP_SOURCE_COPY"`
-
-	MinimumInstructionCoverage float64 `envconfig:"PLUGIN_THRESHOLD_INSTRUCTION"`
-	MinimumBranchCoverage      float64 `envconfig:"PLUGIN_THRESHOLD_BRANCH"`
-	MinimumComplexityCoverage  int     `envconfig:"PLUGIN_THRESHOLD_COMPLEXITY"`
-	MinimumLineCoverage        float64 `envconfig:"PLUGIN_THRESHOLD_LINE"`
-	MinimumMethodCoverage      float64 `envconfig:"PLUGIN_THRESHOLD_METHOD"`
-	MinimumClassCoverage       float64 `envconfig:"PLUGIN_THRESHOLD_CLASS"`
-}
-
 type JacocoCoverageThresholds struct {
 	InstructionCoverageThreshold string
 	BranchCoverageThreshold      string
@@ -80,9 +59,11 @@ type JacocoCoverageThresholdsValues struct {
 	ClassCoverageThreshold       float64
 }
 
-func (p *JacocoPlugin) Init(args pd.Args) error {
+func (p *JacocoPlugin) Init(args *pd.Args) error {
 
 	pd.LogPrintln(p, "JacocoPlugin Init")
+
+	p.InputArgs = args
 
 	err := p.SetBuildRoot("")
 	if err != nil {
@@ -101,16 +82,6 @@ func (p *JacocoPlugin) Init(args pd.Args) error {
 		pd.LogPrintln(p, "JacocoPlugin Error in Init: "+err.Error())
 		return err
 	}
-
-	p.SkipCopyOfSrcFiles = args.SkipCopyOfSrcFiles
-	p.PluginFailOnThreshold = args.PluginFailOnThreshold
-	p.PluginFailIfNoReports = args.PluginFailIfNoReports
-
-	p.MinimumInstructionCoverage = args.MinimumInstructionCoverage
-	p.MinimumBranchCoverage = args.MinimumBranchCoverage
-	p.MinimumComplexityCoverage = args.MinimumComplexityCoverage
-	p.MinimumLineCoverage = args.MinimumLineCoverage
-	p.MinimumMethodCoverage = args.MinimumMethodCoverage
 
 	return nil
 }
@@ -386,7 +357,7 @@ func (p *JacocoPlugin) CopyClassesToWorkspace() error {
 
 func (p *JacocoPlugin) CopySourcesToWorkspace() error {
 
-	if p.SkipCopyOfSrcFiles {
+	if p.InputArgs.SkipCopyOfSrcFiles {
 		pd.LogPrintln(p, "JacocoPlugin Skipping copying of source files")
 		return nil
 	}
@@ -411,17 +382,17 @@ func (p *JacocoPlugin) CopySourcesToWorkspace() error {
 }
 
 func (p *JacocoPlugin) GetClassPatternsStrArray() []string {
-	return pd.ToStringArrayFromCsvString(p.ClassPatterns)
+	return pd.ToStringArrayFromCsvString(p.InputArgs.ClassPatterns)
 }
 
 func (p *JacocoPlugin) GetSourcePatternsStrArray() []string {
-	return pd.ToStringArrayFromCsvString(p.SourcePattern)
+	return pd.ToStringArrayFromCsvString(p.InputArgs.SourcePattern)
 }
 
 func (p *JacocoPlugin) IsSourceArgOk(args pd.Args) error {
 	pd.LogPrintln(p, "JacocoPlugin BuildAndValidateArgs")
 
-	if p.SkipCopyOfSrcFiles {
+	if p.InputArgs.SkipCopyOfSrcFiles {
 		pd.LogPrintln(p, "JacocoPlugin Skipping copying of source files")
 		return nil
 	}
@@ -429,13 +400,13 @@ func (p *JacocoPlugin) IsSourceArgOk(args pd.Args) error {
 	if args.SourcePattern == "" {
 		return pd.GetNewError("Error in IsSourceArgOk: SourcePattern is empty")
 	}
-	p.SourcePattern = args.SourcePattern
-	p.SourceInclusionPattern = args.SourceInclusionPattern
-	p.SourceExclusionPattern = args.SourceExclusionPattern
+	p.InputArgs.SourcePattern = args.SourcePattern
+	p.InputArgs.SourceInclusionPattern = args.SourceInclusionPattern
+	p.InputArgs.SourceExclusionPattern = args.SourceExclusionPattern
 
 	sourcesInfoStoreList, err :=
 		pd.FilterFileOrDirUsingGlobPatterns(p.BuildRootPath, p.GetSourcePatternsStrArray(),
-			p.SourceInclusionPattern, p.SourceExclusionPattern, AllSourcesAutoFillGlob)
+			p.InputArgs.SourceInclusionPattern, p.InputArgs.SourceExclusionPattern, AllSourcesAutoFillGlob)
 
 	if err != nil {
 		pd.LogPrintln(p, "JacocoPlugin Error in IsSourceArgOk: "+err.Error())
@@ -456,13 +427,13 @@ func (p *JacocoPlugin) IsClassArgOk(args pd.Args) error {
 	if args.ClassPatterns == "" {
 		return pd.GetNewError("Error in IsClassArgOk: ClassPatterns is empty")
 	}
-	p.ClassPatterns = args.ClassPatterns
-	p.ClassInclusionPatterns = args.ClassInclusionPatterns
-	p.ClassExclusionPatterns = args.ClassExclusionPatterns
+	p.InputArgs.ClassPatterns = args.ClassPatterns
+	p.InputArgs.ClassInclusionPatterns = args.ClassInclusionPatterns
+	p.InputArgs.ClassExclusionPatterns = args.ClassExclusionPatterns
 
 	classesInfoStoreList, err :=
 		pd.FilterFileOrDirUsingGlobPatterns(p.BuildRootPath, p.GetClassPatternsStrArray(),
-			p.ClassInclusionPatterns, p.ClassExclusionPatterns, AllClassesAutoFillGlob)
+			p.InputArgs.ClassInclusionPatterns, p.InputArgs.ClassExclusionPatterns, AllClassesAutoFillGlob)
 
 	if err != nil {
 		pd.LogPrintln(p, "JacocoPlugin Error in IsClassArgOk: "+err.Error())
@@ -575,15 +546,15 @@ func (p *JacocoPlugin) IsThresholdValuesGood() bool {
 
 	thresholdsCompareList := []ThresholdsCompare{
 		{ObservedValue: p.CoverageThresholds.InstructionCoverageThreshold,
-			ExpectedValue: p.MinimumInstructionCoverage, ThresholdType: "InstructionCoverage"},
+			ExpectedValue: p.InputArgs.MinimumInstructionCoverage, ThresholdType: "InstructionCoverage"},
 		{ObservedValue: p.CoverageThresholds.BranchCoverageThreshold,
-			ExpectedValue: p.MinimumBranchCoverage, ThresholdType: "BranchCoverage"},
+			ExpectedValue: p.InputArgs.MinimumBranchCoverage, ThresholdType: "BranchCoverage"},
 		{ObservedValue: p.CoverageThresholds.LineCoverageThreshold,
-			ExpectedValue: p.MinimumLineCoverage, ThresholdType: "LineCoverage"},
+			ExpectedValue: p.InputArgs.MinimumLineCoverage, ThresholdType: "LineCoverage"},
 		{ObservedValue: p.CoverageThresholds.MethodCoverageThreshold,
-			ExpectedValue: p.MinimumMethodCoverage, ThresholdType: "MethodCoverage"},
+			ExpectedValue: p.InputArgs.MinimumMethodCoverage, ThresholdType: "MethodCoverage"},
 		{ObservedValue: p.CoverageThresholds.ClassCoverageThreshold,
-			ExpectedValue: p.MinimumClassCoverage, ThresholdType: "ClassCoverage"},
+			ExpectedValue: p.InputArgs.MinimumClassCoverage, ThresholdType: "ClassCoverage"},
 	}
 
 	for _, thresholdCompare := range thresholdsCompareList {
@@ -595,8 +566,9 @@ func (p *JacocoPlugin) IsThresholdValuesGood() bool {
 		}
 	}
 
-	if p.CoverageThresholds.ComplexityCoverageThreshold > p.MinimumComplexityCoverage {
-		pd.LogPrintln(p, "JacocoPlugin ComplexityCoverage threshold not met", " expected = ", p.MinimumComplexityCoverage,
+	if p.CoverageThresholds.ComplexityCoverageThreshold > p.InputArgs.MinimumComplexityCoverage {
+		pd.LogPrintln(p, "JacocoPlugin ComplexityCoverage threshold not met",
+			" expected = ", p.InputArgs.MinimumComplexityCoverage,
 			" observed = ", p.CoverageThresholds.ComplexityCoverageThreshold)
 		return false
 	}
@@ -613,7 +585,7 @@ func (p *JacocoPlugin) GenerateJacocoReports() error {
 	args = append(args, p.GetReportArgs()+" ")
 	args = append(args, p.GetClassFilesPathArgs()+" ")
 
-	if p.SkipCopyOfSrcFiles == false {
+	if p.InputArgs.SkipCopyOfSrcFiles == false {
 		args = append(args, p.GetSourceFilesPathArgs()+" ")
 	}
 
