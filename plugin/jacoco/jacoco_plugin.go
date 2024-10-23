@@ -85,8 +85,18 @@ func (p *JacocoPlugin) SetJarPath() error {
 
 	_, err := os.Stat(p.JacocoJarPath)
 	if err != nil {
-		pd.LogPrintln(p, "JacocoPlugin Error in SetJarPath: "+err.Error())
-		return pd.GetNewError("Error in SetJarPath: " + err.Error())
+		cwd, err := os.Getwd()
+		if err != nil {
+			pd.LogPrintln(p, "JacocoPlugin Error in SetJarPath: "+err.Error())
+			return pd.GetNewError("Error in SetJarPath: " + err.Error())
+		}
+
+		p.JacocoJarPath = filepath.Join(cwd, TestJacocoJarPath)
+		_, err = os.Stat(p.JacocoJarPath)
+		if err != nil {
+			pd.LogPrintln(p, "JacocoPlugin Error in SetJarPath: "+err.Error())
+			return pd.GetNewError("Error in SetJarPath: " + err.Error())
+		}
 	}
 
 	return nil
@@ -711,6 +721,7 @@ const (
 	AllClassesAutoFillGlob       = "**/*.class"
 	AllSourcesAutoFillGlob       = "**/*.java"
 	DefaultJacocoJarPath         = "/opt/harness/plugins-deps/jacoco/0.8.12/jacoco.jar"
+	TestJacocoJarPath            = "../test/tmp_workspace/jacoco.jar"
 )
 
 //
