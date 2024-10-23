@@ -96,21 +96,21 @@ func (p *JacocoPlugin) CreateNewWorkspace() error {
 
 	jacocoWorkSpaceDir, err := p.GetBuildRootPath()
 	if err != nil {
-		pd.LogPrintln(p, "JacocoPlugin Error in CopyClassesToWorkspace: "+err.Error())
-		return pd.GetNewError("Error in CopyClassesToWorkspace: " + err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in Creat`eNewWorkspace: "+err.Error())
+		return pd.GetNewError("Error in CreateNewWorkspace: " + err.Error())
 	}
 
 	p.JacocoWorkSpaceDir = jacocoWorkSpaceDir
 
 	err = pd.CreateDir(p.JacocoWorkSpaceDir)
 	if err != nil {
-		pd.LogPrintln(p, "JacocoPlugin Error in Init: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin CreateNewWorkspace Error: "+err.Error())
 		return err
 	}
 
 	err = pd.CreateDir(p.GetOutputReportsWorkSpaceDir())
 	if err != nil {
-		pd.LogPrintln(p, "JacocoPlugin Error in Init: "+err.Error())
+		pd.LogPrintln(p, "JacocoPlugin CreateNewWorkspace Error: "+err.Error())
 		return err
 	}
 
@@ -118,7 +118,12 @@ func (p *JacocoPlugin) CreateNewWorkspace() error {
 }
 
 func (p *JacocoPlugin) GetWorkspaceDir() string {
+
 	p.JacocoWorkSpaceDir = os.Getenv(pd.DefaultWorkSpaceDirEnvVarKey)
+	if p.JacocoWorkSpaceDir == "" {
+		p.JacocoWorkSpaceDir = pd.GetTestWorkSpaceDir()
+	}
+
 	return p.JacocoWorkSpaceDir
 }
 
@@ -145,11 +150,10 @@ func (p *JacocoPlugin) InspectProcessArgs(argNamesList []string) (map[string]int
 }
 
 func (p *JacocoPlugin) GetBuildRootPath() (string, error) {
-	buildRootPath := os.Getenv(BuildRootPathKeyStr)
+	buildRootPath := os.Getenv(pd.DefaultWorkSpaceDirEnvVarKey)
 
 	if buildRootPath == "" {
-		pd.LogPrintln(p, "JacocoPlugin Error in GetBuildRootPath: Build root path is empty")
-		return "", pd.GetNewError("Error in GetBuildRootPath: Build")
+		return pd.GetTestBuildRootDir(), nil
 	}
 
 	return buildRootPath, nil
@@ -327,8 +331,6 @@ func (p *JacocoPlugin) CopyClassesToWorkspace() error {
 	}
 
 	dstClassesDir := p.GetClassesWorkSpaceDir()
-	pd.LogPrintln(p, "JacocoPlugin Copying classes to workspace: "+dstClassesDir)
-
 	err := pd.CreateDir(dstClassesDir)
 	if err != nil {
 		pd.LogPrintln(p, "JacocoPlugin Error in CopyClassesToWorkspace: "+err.Error())
@@ -683,7 +685,7 @@ func (p *JacocoPlugin) WriteOutputVariables() error {
 
 	fmt.Println("\n\nReading JacocoPlugin Output Variables file ", pd.GetOutputVariablesStorageFilePath())
 	fmt.Println(s)
-	fmt.Println("Reading Complete\n\n")
+	fmt.Println("Reading Complete")
 
 	return retErr
 }
@@ -701,7 +703,6 @@ func GetNewJacocoPlugin() JacocoPlugin {
 }
 
 const (
-	BuildRootPathKeyStr          = "DRONE_WORKSPACE"
 	JacocoReportsDirName         = "jacoco_reports_dir"
 	ClassFilesListParamKey       = "ClassFilesList"
 	ClassesInfoStoreListParamKey = "ClassesInfoStoreList"

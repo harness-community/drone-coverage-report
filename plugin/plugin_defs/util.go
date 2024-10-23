@@ -13,8 +13,6 @@ import (
 	"fmt"
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/sirupsen/logrus"
-
-	// "github.com/harness-community/drone-coverage-report/plugin"
 	"io"
 	"io/ioutil"
 	"os"
@@ -590,8 +588,17 @@ func StructToJSONWithEnvKeys(v interface{}) (string, error) {
 	return string(jsonData), nil
 }
 
+func GetTestWorkSpaceDir() string {
+	return TestWorkSpaceDir
+}
+
+func GetTestBuildRootDir() string {
+	return GetTestWorkSpaceDir()
+}
+
 const (
 	DefaultWorkSpaceDirEnvVarKey = "DRONE_WORKSPACE"
+	TestWorkSpaceDir             = "../test/tmp_workspace"
 )
 
 //

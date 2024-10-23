@@ -11,7 +11,7 @@ set -x
 
 # linux
 GOOS=linux GOARCH=amd64 go build -o release/linux/amd64/plugin
-#GOOS=linux GOARCH=arm64 go build -o release/linux/arm64/plugin
+GOOS=linux GOARCH=arm64 go build -o release/linux/arm64/plugin
 #GOOS=linux GOARCH=arm   go build -o release/linux/arm/plugin
 
 # windows

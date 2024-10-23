@@ -23,8 +23,11 @@ java -jar jacoco.jar \
 // rm -rf /opt/hns/test-resources/game-of-life-master/jacoco-workspace--* && DRONE_WORKSPACE=/opt/hns/test-resources/game-of-life-master go test -count=1 -run ^TestSourcePathWithIncludeAndExclude$
 func TestSourcePathWithIncludeAndExclude(t *testing.T) {
 
-	classPatterns := "/opt/hns/test-resources/game-of-life-master/**/target/classes," + " " +
-		"/opt/hns/test-resources/game-of-life-master/**/WEB-INF/classes"
+	const TestFilesBasePath = "../test/tmp_workspace/game-of-life"
+
+	classPatterns := TestFilesBasePath + "/**/target/classes," + " " +
+		TestFilesBasePath + "/**/WEB-INF/classes"
+
 	classInclusionPatterns := "**/*.class, **/*.xml"
 	classExclusionPatterns := "**/controllers/*.class"
 
@@ -75,11 +78,11 @@ func CheckSourceAndClassPathsWithIncludeExcludeVariations(
 
 func CheckFilesCopiedToWorkSpace(wsi WorkSpaceInfo, t *testing.T) {
 	expectedFilesList := []string{
-		"$WORKSPACE/sources/gameoflife-core/src/main/java/com/wakaleo/gameoflife/domain/Universe.java",
-		"$WORKSPACE/sources/gameoflife-core/src/main/java/com/wakaleo/gameoflife/domain/Grid.java",
-		"$WORKSPACE/sources/gameoflife-core/src/main/java/com/wakaleo/gameoflife/domain/Cell.java",
-		"$WORKSPACE/sources/gameoflife-core/src/main/java/com/wakaleo/gameoflife/domain/GridReader.java",
-		"$WORKSPACE/sources/gameoflife-core/src/main/java/com/wakaleo/gameoflife/domain/GridWriter.java",
+		"$WORKSPACE/sources/game-of-life/gameoflife-core/src/main/java/com/wakaleo/gameoflife/domain/Universe.java",
+		"$WORKSPACE/sources/game-of-life/gameoflife-core/src/main/java/com/wakaleo/gameoflife/domain/Grid.java",
+		"$WORKSPACE/sources/game-of-life/gameoflife-core/src/main/java/com/wakaleo/gameoflife/domain/Cell.java",
+		"$WORKSPACE/sources/game-of-life/gameoflife-core/src/main/java/com/wakaleo/gameoflife/domain/GridReader.java",
+		"$WORKSPACE/sources/game-of-life/gameoflife-core/src/main/java/com/wakaleo/gameoflife/domain/GridWriter.java",
 		"$WORKSPACE/classes/pmd-rules.xml",
 		"$WORKSPACE/classes/com/wakaleo/gameoflife/domain/Universe.class",
 		"$WORKSPACE/classes/com/wakaleo/gameoflife/domain/Cell.class",
@@ -87,18 +90,17 @@ func CheckFilesCopiedToWorkSpace(wsi WorkSpaceInfo, t *testing.T) {
 		"$WORKSPACE/classes/com/wakaleo/gameoflife/domain/GridWriter.class",
 		"$WORKSPACE/classes/com/wakaleo/gameoflife/domain/Grid.class",
 		"$WORKSPACE/classes/custom-checkstyle.xml",
-		"$WORKSPACE/execFiles/gameoflife-core/target/jacoco.exec",
-		"$WORKSPACE/execFiles/gameoflife-web/target/jacoco.exec",
+		"$WORKSPACE/execFiles/game-of-life/gameoflife-core/target/jacoco.exec",
+		"$WORKSPACE/execFiles/game-of-life/gameoflife-web/target/jacoco.exec",
 	}
 
 	for _, expectedFile := range expectedFilesList {
-		completePath := strings.ReplaceAll(expectedFile, "$WORKSPACE", wsi.WorkSpaceCompletePathKeyStr.Workspace+"/")
+		completePath := strings.ReplaceAll(expectedFile, "$WORKSPACE", pd.GetTestWorkSpaceDir()+"/")
 		_, err := os.Stat(completePath)
 		if err != nil {
 			t.Errorf("Error in CheckFilesCopiedToWorkSpace: %s", err.Error())
 		}
 	}
-
 }
 
 func CheckSourcePathsWithClassPaths(classPattern, classInclusionPattern, classExclusionPattern,
