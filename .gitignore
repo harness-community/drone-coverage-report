@@ -1,0 +1,11 @@
+.env
+release/
+
+.idea/
+/main
+drone-coverage-report
+build/
+test/tmp_workspace/classes/
+test/tmp_workspace/execFiles/
+test/tmp_workspace/sources/
+test/tmp_workspace/jacoco_reports_dir/

@@ -1,0 +1,16 @@
+.DS_Store 
+.project
+.settings
+.idea
+.classpath
+.checkstyle
+.pmd
+*.log
+*.log.*
+*.iml  
+*.ipr
+*.iws
+*.versionsBackup
+
+*.iml
+.DS_Store
