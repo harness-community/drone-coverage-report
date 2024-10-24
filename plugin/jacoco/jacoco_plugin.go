@@ -153,6 +153,8 @@ func (p *JacocoPlugin) InspectProcessArgs(argNamesList []string) (map[string]int
 			nm["execFiles"] = p.GetExecFilesWorkSpaceDir()
 			nm["workspace"] = p.GetWorkspaceDir()
 			m[argName] = nm
+		case ExecFilePathsWithPrefixListStr:
+			m[argName] = p.ExecFilePathsWithPrefixList
 		}
 
 	}
@@ -425,7 +427,7 @@ func (p *JacocoPlugin) IsSourceArgOk(args pd.Args) error {
 
 func (p *JacocoPlugin) IsClassArgOk(args pd.Args) error {
 
-	pd.LogPrintln(p, "JacocoPlugin BuildAndValidateArgs")
+	pd.LogPrintln(p, "JacocoPlugin IsClassArgOk")
 
 	if args.ClassPatterns == "" {
 		return pd.GetNewError("Error in IsClassArgOk: ClassPatterns is empty")
@@ -687,17 +689,21 @@ func (p *JacocoPlugin) WriteOutputVariables() error {
 		}
 	}
 
+	//p.DebugPrintOutputVariables()
+
+	return retErr
+}
+
+func (p *JacocoPlugin) DebugPrintOutputVariables() {
 	s, err := pd.ReadFileAsString(pd.GetOutputVariablesStorageFilePath())
 	if err != nil {
-		pd.LogPrintln(p, "JacocoPlugin Error in WriteOutputVariables: "+err.Error())
-		return pd.GetNewError("Error in WriteOutputVariables: " + err.Error())
+		pd.LogPrintln(p, "JacocoPlugin Error in ReadFileAsString: "+err.Error())
+		return
 	}
 
 	fmt.Println("\n\nReading JacocoPlugin Output Variables file ", pd.GetOutputVariablesStorageFilePath())
 	fmt.Println(s)
 	fmt.Println("Reading Complete")
-
-	return retErr
 }
 
 func (p *JacocoPlugin) IsQuiet() bool {
@@ -713,15 +719,16 @@ func GetNewJacocoPlugin() JacocoPlugin {
 }
 
 const (
-	JacocoReportsDirName         = "jacoco_reports_dir"
-	ClassFilesListParamKey       = "ClassFilesList"
-	ClassesInfoStoreListParamKey = "ClassesInfoStoreList"
-	FinalizedSourcesListParamKey = "FinalizedSourcesList"
-	WorkSpaceCompletePathKeyStr  = "WorkSpaceCompletePathKeyStr"
-	AllClassesAutoFillGlob       = "**/*.class"
-	AllSourcesAutoFillGlob       = "**/*.java"
-	DefaultJacocoJarPath         = "/opt/harness/plugins-deps/jacoco/0.8.12/jacoco.jar"
-	TestJacocoJarPath            = "../test/tmp_workspace/jacoco.jar"
+	JacocoReportsDirName           = "jacoco_reports_dir"
+	ClassFilesListParamKey         = "ClassFilesList"
+	ClassesInfoStoreListParamKey   = "ClassesInfoStoreList"
+	FinalizedSourcesListParamKey   = "FinalizedSourcesList"
+	WorkSpaceCompletePathKeyStr    = "WorkSpaceCompletePathKeyStr"
+	AllClassesAutoFillGlob         = "**/*.class"
+	AllSourcesAutoFillGlob         = "**/*.java"
+	DefaultJacocoJarPath           = "/opt/harness/plugins-deps/jacoco/0.8.12/jacoco.jar"
+	TestJacocoJarPath              = "../test/tmp_workspace/jacoco.jar"
+	ExecFilePathsWithPrefixListStr = "ExecFilePathsWithPrefixList"
 )
 
 //

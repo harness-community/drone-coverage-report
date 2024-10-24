@@ -5,6 +5,7 @@ import (
 	jc "github.com/harness-community/drone-coverage-report/plugin/jacoco"
 	pd "github.com/harness-community/drone-coverage-report/plugin/plugin_defs"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -25,8 +26,8 @@ func TestSourcePathWithIncludeAndExclude(t *testing.T) {
 
 	const TestFilesBasePath = "../test/tmp_workspace/game-of-life"
 
-	classPatterns := TestFilesBasePath + "/**/target/classes," + " " +
-		TestFilesBasePath + "/**/WEB-INF/classes"
+	classPatterns := "**/target/classes," + " " +
+		"**/WEB-INF/classes"
 
 	classInclusionPatterns := "**/*.class, **/*.xml"
 	classExclusionPatterns := "**/controllers/*.class"
@@ -69,33 +70,48 @@ func CheckSourceAndClassPathsWithIncludeExcludeVariations(
 		t.Errorf("Error in TestClassPathWithIncludeExclude: %s", err.Error())
 	}
 
-	wsi, err := pd.ToStructFromJsonString[WorkSpaceInfo](js)
+	_, err = pd.ToStructFromJsonString[WorkSpaceInfo](js)
 	if err != nil {
 		t.Errorf("Error in TestClassPathWithIncludeExclude: %s", err.Error())
 	}
-	CheckFilesCopiedToWorkSpace(wsi, t)
+
+	execPathsWithPrefixList, err := plugin.InspectProcessArgs([]string{jc.ExecFilePathsWithPrefixListStr})
+	if err != nil {
+		t.Errorf("Error in TestClassPathWithIncludeExclude: %s", err.Error())
+	}
+
+	CheckFilesCopiedToWorkSpace(execPathsWithPrefixList, t)
 }
 
-func CheckFilesCopiedToWorkSpace(wsi WorkSpaceInfo, t *testing.T) {
+func CheckFilesCopiedToWorkSpace(execPathsWithPrefixList map[string]interface{}, t *testing.T) {
+
 	expectedFilesList := []string{
-		"$WORKSPACE/sources/game-of-life/gameoflife-core/src/main/java/com/wakaleo/gameoflife/domain/Universe.java",
-		"$WORKSPACE/sources/game-of-life/gameoflife-core/src/main/java/com/wakaleo/gameoflife/domain/Grid.java",
-		"$WORKSPACE/sources/game-of-life/gameoflife-core/src/main/java/com/wakaleo/gameoflife/domain/Cell.java",
-		"$WORKSPACE/sources/game-of-life/gameoflife-core/src/main/java/com/wakaleo/gameoflife/domain/GridReader.java",
-		"$WORKSPACE/sources/game-of-life/gameoflife-core/src/main/java/com/wakaleo/gameoflife/domain/GridWriter.java",
-		"$WORKSPACE/classes/pmd-rules.xml",
+		"$WORKSPACE/sources/com/wakaleo/gameoflife/domain/Universe.java",
+		"$WORKSPACE/sources/com/wakaleo/gameoflife/domain/Grid.java",
+		"$WORKSPACE/sources/com/wakaleo/gameoflife/domain/Cell.java",
+		"$WORKSPACE/sources/com/wakaleo/gameoflife/domain/GridReader.java",
+		"$WORKSPACE/sources/com/wakaleo/gameoflife/domain/GridWriter.java",
 		"$WORKSPACE/classes/com/wakaleo/gameoflife/domain/Universe.class",
 		"$WORKSPACE/classes/com/wakaleo/gameoflife/domain/Cell.class",
 		"$WORKSPACE/classes/com/wakaleo/gameoflife/domain/GridReader.class",
 		"$WORKSPACE/classes/com/wakaleo/gameoflife/domain/GridWriter.class",
 		"$WORKSPACE/classes/com/wakaleo/gameoflife/domain/Grid.class",
 		"$WORKSPACE/classes/custom-checkstyle.xml",
-		"$WORKSPACE/execFiles/game-of-life/gameoflife-core/target/jacoco.exec",
-		"$WORKSPACE/execFiles/game-of-life/gameoflife-web/target/jacoco.exec",
+	}
+
+	tmpVal, ok := execPathsWithPrefixList["ExecFilePathsWithPrefixList"]
+	if !ok {
+		t.Errorf("Error in CheckFilesCopiedToWorkSpace: %s", "ExecFilePathsWithPrefixList not found")
+	}
+
+	lst := tmpVal.([]pd.PathWithPrefix)
+	for _, p := range lst {
+		execFilePath := filepath.Join(pd.GetTestWorkSpaceDir(), "execFiles", p.RelativePath)
+		expectedFilesList = append(expectedFilesList, execFilePath)
 	}
 
 	for _, expectedFile := range expectedFilesList {
-		completePath := strings.ReplaceAll(expectedFile, "$WORKSPACE", pd.GetTestWorkSpaceDir()+"/")
+		completePath := strings.ReplaceAll(expectedFile, "$WORKSPACE", pd.GetTestWorkSpaceDir())
 		_, err := os.Stat(completePath)
 		if err != nil {
 			t.Errorf("Error in CheckFilesCopiedToWorkSpace: %s", err.Error())
