@@ -24,6 +24,10 @@ java -jar jacoco.jar \
 // rm -rf /opt/hns/test-resources/game-of-life-master/jacoco-workspace--* && DRONE_WORKSPACE=/opt/hns/test-resources/game-of-life-master go test -count=1 -run ^TestSourcePathWithIncludeAndExclude$
 func TestSourcePathWithIncludeAndExclude(t *testing.T) {
 
+	if os.Getenv("DRONE_OUTPUT") == "" {
+		t.Errorf("env var DRONE_OUTPUT not set, should be set to /tmp/drone-output")
+	}
+
 	const TestFilesBasePath = "../test/tmp_workspace/game-of-life"
 
 	classPatterns := "**/target/classes," + " " +

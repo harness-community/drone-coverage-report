@@ -594,6 +594,10 @@ func ReadFileAsString(filePath string) (string, error) {
 
 func WriteEnvVariableAsString(key string, value interface{}) error {
 
+	if GetOutputVariablesStorageFilePath() == "" {
+		return GetNewError("Output file path is empty, check env var DRONE_OUTPUT")
+	}
+
 	outputFile, err := os.OpenFile(GetOutputVariablesStorageFilePath(), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to open output file: %w", err)
