@@ -69,16 +69,23 @@ step:
 Build the plugin binary:
 
 ```text
-scripts/build.sh
+sh scripts/build.sh
 ```
 
 Build the plugin image:
 
-```text
-docker build -t plugins/coverage-report -f docker/Dockerfile .
+For amd64 use
+```bash
+docker build -t plugins/coverage-report -f docker/Dockerfile.linux.amd64 .
+```
+For arm64 use
+```bash
+docker build -t plugins/coverage-report -f docker/Dockerfile.linux.arm64 .
 ```
 
 # Testing
+
+DRONE_OUTPUT should be set to "/tmp/drone-output" in non drone environment while testing
 
 Execute the plugin from your current working directory:
 
@@ -103,10 +110,18 @@ docker run --rm \
   -e PLUGIN_THRESHOLD_METHOD='0' \
   -e PLUGIN_THRESHOLD_CLASS='0' \
   -e PLUGIN_DRONE_WORKSPACE='/harness' \
+  -e PLUGIN_DRONE_OUTPUT='/tmp/drone-output' \
   -w /drone/src \
   -v $(pwd):/drone/src \
 plugins/coverage-report
 ```
 
+Unit test should be run using
+```shell
+DRONE_OUTPUT=/tmp/drone-output go test ./...
+```
+
 # Supported arch and os
 This plugin can only be run on linux amd64/arm64. Windows build not supported.
+
+
