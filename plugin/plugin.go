@@ -18,6 +18,9 @@ func GetNewPlugin(ctx context.Context, args pd.Args) (pd.Plugin, error) {
 	case pd.JacocoPluginType:
 		jcp := jc.GetNewJacocoPlugin()
 		return &jcp, nil
+	case pd.JacocoXmlPluginType:
+		jcxp := jc.GetNewJacocoXmlPlugin()
+		return &jcxp, nil
 
 	default:
 		return nil, pd.GetNewError("Unknown plugin type: " + pluginToolType)

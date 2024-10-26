@@ -541,6 +541,10 @@ func (p *JacocoPlugin) AnalyzeJacocoCoverageThresholds() error {
 	return nil
 }
 
+func (p *JacocoPlugin) SetCoverageThresholds(thresholdValues JacocoCoverageThresholdsValues) {
+	p.CoverageThresholds = thresholdValues
+}
+
 func (p *JacocoPlugin) IsThresholdValuesGood() bool {
 
 	type ThresholdsCompare struct {
