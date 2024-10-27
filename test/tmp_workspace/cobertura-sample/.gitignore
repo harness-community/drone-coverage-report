@@ -1,0 +1,16 @@
+cobertura-sample/target/
+*.class
+*.ser
+cobertura-sample/target/site/cobertura/
+cobertura-sample/target/generated-sources/
+cobertura-sample/target/generated-test-sources/
+cobertura-sample/target/generated-classes/
+cobertura-sample/target/maven-status/
+cobertura-sample/target/surefire-reports/
+*.log
+*.tmp
+*.swp
+.idea/
+*.iml
+*.project
+*.classpath

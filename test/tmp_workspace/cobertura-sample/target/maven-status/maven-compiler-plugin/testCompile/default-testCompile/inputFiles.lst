@@ -1,0 +1,3 @@
+/opt/hns/harness-plugins/corbertura/drone-coverage-report/test/tmp_workspace/cobertura-sample/src/test/java/com/example/package1/CalculatorTest.java
+/opt/hns/harness-plugins/corbertura/drone-coverage-report/test/tmp_workspace/cobertura-sample/src/test/java/com/example/package3/DividerTest.java
+/opt/hns/harness-plugins/corbertura/drone-coverage-report/test/tmp_workspace/cobertura-sample/src/test/java/com/example/package2/MultiplierTest.java
