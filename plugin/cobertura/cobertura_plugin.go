@@ -181,7 +181,34 @@ func (c *CoberturaPlugin) LocateCoberturaCoverageXmlPath() error {
 }
 
 func (c *CoberturaPlugin) WriteOutputVariables() error {
-	return nil
+
+	type EnvKvPair struct {
+		Key   string
+		Value interface{}
+	}
+
+	var kvPairs = []EnvKvPair{
+		{Key: "BRANCH_COVERAGE", Value: fmt.Sprintf("%.2f", c.Stats.BranchCoverage)},
+		{Key: "LINE_COVERAGE", Value: fmt.Sprintf("%.2f", c.Stats.LineCoverage)},
+		{Key: "COMPLEXITY_COVERAGE", Value: c.Stats.Complexity},
+		{Key: "METHOD_COVERAGE", Value: fmt.Sprintf("%.2f", c.Stats.MethodCoverage)},
+		{Key: "CLASS_COVERAGE", Value: fmt.Sprintf("%.2f", c.Stats.ClassCoverage)},
+		{Key: "FILE_COVERAGE", Value: fmt.Sprintf("%.2f", c.Stats.FileCoverage)},
+		{Key: "PACKAGE_COVERAGE", Value: fmt.Sprintf("%.2f", c.Stats.PackageCoverage)},
+		{Key: "COMPLEXITY_DENSITY", Value: c.Stats.ComplexityDensity},
+		{Key: "LOC", Value: c.Stats.LOC},
+	}
+
+	var retErr error = nil
+
+	for _, kvPair := range kvPairs {
+		err := pd.WriteEnvVariableAsString(kvPair.Key, kvPair.Value)
+		if err != nil {
+			retErr = err
+		}
+	}
+
+	return retErr
 }
 
 func (c *CoberturaPlugin) PersistResults() error {
