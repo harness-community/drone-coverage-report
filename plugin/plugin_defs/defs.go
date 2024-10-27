@@ -46,6 +46,12 @@ type EnvPluginInputArgs struct {
 	MinimumLineCoverage        float64 `envconfig:"PLUGIN_THRESHOLD_LINE"`
 	MinimumMethodCoverage      float64 `envconfig:"PLUGIN_THRESHOLD_METHOD"`
 	MinimumClassCoverage       float64 `envconfig:"PLUGIN_THRESHOLD_CLASS"`
+
+	// Package and File only for Cobertura
+	MinimumPackageCoverage       float64 `envconfig:"PLUGIN_THRESHOLD_PACKAGE"`
+	MinimumFileCoverage          float64 `envconfig:"PLUGIN_THRESHOLD_FILE"`
+	MinimumLOC                   int     `envconfig:"PLUGIN_THRESHOLD_LOC"`
+	MaxComplexityDensityCoverage float64 `envconfig:"PLUGIN_THRESHOLD_COMPLEXITY_DENSITY"`
 }
 
 type PluginOutputVariables struct {
@@ -60,5 +66,5 @@ type PluginOutputVariables struct {
 const (
 	JacocoPluginType    = "jacoco"
 	JacocoXmlPluginType = "jacoco-xml"
-	CorbeturaPluginType = "corbetura"
+	CoberturaPluginType = "cobertura"
 )
