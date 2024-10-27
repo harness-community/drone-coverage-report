@@ -104,6 +104,7 @@ func (jxp *JacocoXmlPlugin) Run() error {
 
 func (jxp *JacocoXmlPlugin) WriteOutputVariables() error {
 	pd.LogPrintln(jxp, "Writing output variables in JacocoXmlPlugin")
+	jxp.JacocoBasePlugin.WriteOutputVariables()
 	return nil
 }
 
