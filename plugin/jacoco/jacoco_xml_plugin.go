@@ -93,6 +93,11 @@ func (jxp *JacocoXmlPlugin) Run() error {
 	pd.LogPrintln(jxp, "Jacoco threshold values: ", jacocoThresholdValues)
 
 	jxp.JacocoBasePlugin.SetCoverageThresholds(jacocoThresholdValues)
+
+	if jxp.JacocoBasePlugin.InputArgs.PluginFailOnThreshold == false {
+		return nil
+	}
+
 	isGood := jxp.JacocoBasePlugin.IsThresholdValuesGood()
 	if !isGood {
 		pd.LogPrintln(jxp, "JacocoXmlPlugin: Coverage thresholds not met")

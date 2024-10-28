@@ -20,24 +20,6 @@ type CoberturaPluginStateStore struct {
 	CompleteCoverageXmlPath string
 }
 
-type CoberturaPluginCoverageThresholds struct {
-	InstructionCoverageThreshold string
-	BranchCoverageThreshold      string
-	LineCoverageThreshold        string
-	ComplexityCoverageThreshold  int
-	MethodCoverageThreshold      string
-	ClassCoverageThreshold       string
-}
-
-type CoberturaPluginThresholdsValues struct {
-	InstructionCoverageThreshold float64
-	BranchCoverageThreshold      float64
-	LineCoverageThreshold        float64
-	ComplexityCoverageThreshold  int
-	MethodCoverageThreshold      float64
-	ClassCoverageThreshold       float64
-}
-
 func (c *CoberturaPlugin) Init(args *pd.Args) error {
 	c.InputArgs = args
 	c.CoberturaPluginStateStore.WorkSpacePath = pd.GetTestWorkSpaceDir()
@@ -113,22 +95,10 @@ func (c *CoberturaPlugin) AnalyzeCoberturaThresholds() bool {
 		{c.Stats.FileCoverage, c.InputArgs.MinimumFileCoverage, "File"},
 	}
 
-	for _, x := range thresholdsCompareList {
-		fmt.Println(x.ThresholdType+" Observed Value: ", x.ObservedValue, " Expected Value: ", x.ExpectedValue)
-	}
-	fmt.Println("LOC : ", c.Stats.LOC, " LOC: ", c.InputArgs.MinimumLOC)
-	fmt.Println("Complexity : ", c.Stats.Complexity,
-		" Max Complexity: ", c.InputArgs.MinimumComplexityCoverage)
-	fmt.Println("Complexity Density: ", complexityDensity,
-		" Max Complexity Density: ", c.InputArgs.MaxComplexityDensityCoverage)
-
 	for _, thresholdCompare := range thresholdsCompareList {
 		if thresholdCompare.ObservedValue < thresholdCompare.ExpectedValue {
 			pd.LogPrintln(c, "CoberturaPlugin "+thresholdCompare.ThresholdType+" threshold not met",
 				" expected = ", thresholdCompare.ExpectedValue, " observed = ", thresholdCompare.ObservedValue)
-			fmt.Println("CoberturaPlugin "+thresholdCompare.ThresholdType+" threshold not met",
-				" expected = ", thresholdCompare.ExpectedValue, " observed = ", thresholdCompare.ObservedValue, " ",
-				thresholdCompare.ThresholdType)
 			return false
 		}
 	}
@@ -160,8 +130,6 @@ func (c *CoberturaPlugin) LocateCoberturaCoverageXmlPath() error {
 		return err
 	}
 
-	fmt.Println("Complete workspace dir: ", completeWorkSpaceDir)
-
 	baseSearchDir := os.DirFS(completeWorkSpaceDir)
 	matchedDirs, err := doublestar.Glob(baseSearchDir, c.GetCoberturaFilesPathPattern())
 	if err != nil {
@@ -173,7 +141,6 @@ func (c *CoberturaPlugin) LocateCoberturaCoverageXmlPath() error {
 	}
 
 	relativeXmlReportPath := matchedDirs[0]
-	fmt.Println("Relative xml report path: ", relativeXmlReportPath)
 
 	c.CompleteCoverageXmlPath = filepath.Join(completeWorkSpaceDir, relativeXmlReportPath)
 
@@ -190,11 +157,11 @@ func (c *CoberturaPlugin) WriteOutputVariables() error {
 	var kvPairs = []EnvKvPair{
 		{Key: "BRANCH_COVERAGE", Value: fmt.Sprintf("%.2f", c.Stats.BranchCoverage)},
 		{Key: "LINE_COVERAGE", Value: fmt.Sprintf("%.2f", c.Stats.LineCoverage)},
-		{Key: "COMPLEXITY_COVERAGE", Value: c.Stats.Complexity},
 		{Key: "METHOD_COVERAGE", Value: fmt.Sprintf("%.2f", c.Stats.MethodCoverage)},
 		{Key: "CLASS_COVERAGE", Value: fmt.Sprintf("%.2f", c.Stats.ClassCoverage)},
 		{Key: "FILE_COVERAGE", Value: fmt.Sprintf("%.2f", c.Stats.FileCoverage)},
 		{Key: "PACKAGE_COVERAGE", Value: fmt.Sprintf("%.2f", c.Stats.PackageCoverage)},
+		{Key: "COMPLEXITY_COVERAGE", Value: c.Stats.Complexity},
 		{Key: "COMPLEXITY_DENSITY", Value: c.Stats.ComplexityDensity},
 		{Key: "LOC", Value: c.Stats.LOC},
 	}
@@ -229,8 +196,4 @@ func (c *CoberturaPlugin) InspectProcessArgs(argNamesList []string) (map[string]
 
 func GetNewCoberturaPlugin() CoberturaPlugin {
 	return CoberturaPlugin{}
-}
-
-func GetNewCoberturaPluginStateStore() CoberturaPluginStateStore {
-	return CoberturaPluginStateStore{}
 }

@@ -134,12 +134,12 @@ func calculateCoverage(c Coverage) CoverageStats {
 	branchCoverage := calculatePercentage(totalCoveredBranches, totalBranches)
 	lineCoverage := calculatePercentage(totalCovered, totalLines)
 
-	fmt.Printf("Branch covered: %v Total branches: %v\n", totalCoveredBranches, totalBranches)
-	fmt.Printf("Methods covered: %v Total methods: %v\n", totalMethodsCovered, totalMethods)
-	fmt.Printf("Classes covered: %v Total classes: %v\n", totalCoveredClasses, totalClasses)
-	fmt.Printf("Complexity: %v\n", totalComplexity)
-	fmt.Printf("Total Lines: %v\n", totalLines)
-	fmt.Printf("Method Coverage: %v\n", totalMethods)
+	fmt.Printf("Branch covered: %d Total branches: %d\n", totalCoveredBranches, totalBranches)
+	fmt.Printf("Methods covered: %d Total methods: %d\n", totalMethodsCovered, totalMethods)
+	fmt.Printf("Classes covered: %d Total classes: %d\n", totalCoveredClasses, totalClasses)
+	fmt.Printf("Complexity: %.2f\n", totalComplexity)
+	fmt.Printf("Total Lines: %d\n", totalLines)
+	fmt.Printf("Method Coverage: %d\n", totalMethods)
 
 	return CoverageStats{
 		PackageCoverage:   packageCoverage,
@@ -148,7 +148,7 @@ func calculateCoverage(c Coverage) CoverageStats {
 		BranchCoverage:    branchCoverage,
 		LineCoverage:      lineCoverage,
 		Complexity:        int(totalComplexity),
-		ComplexityDensity: fmt.Sprintf("%v/%v", int(totalComplexity), totalLines),
+		ComplexityDensity: fmt.Sprintf("%d/%d", int(totalComplexity), totalLines),
 		LOC:               totalLines,
 	}
 }
