@@ -195,19 +195,6 @@ func calculatePercentage(part, total int) float64 {
 	return float64(part) / float64(total) * 100
 }
 
-//
-//func printCoverageStats(stats CoverageStats) {
-//	fmt.Printf("Package Coverage: %.2f%%\n", stats.PackageCoverage)
-//	fmt.Printf("File Coverage: %.2f%%\n", stats.FileCoverage)
-//	fmt.Printf("Class Coverage: %.2f%%\n", stats.ClassCoverage)
-//	fmt.Printf("Branch Coverage: %.2f%%\n", stats.BranchCoverage)
-//	fmt.Printf("Line Coverage: %.2f%%\n", stats.LineCoverage)
-//	fmt.Printf("Complexity: %v\n", stats.Complexity)
-//	fmt.Printf("Complexity Density: %v\n", stats.ComplexityDensity)
-//	fmt.Printf("LOC: %v\n", stats.LOC)
-//
-//}
-
 func (stats *CoverageStats) PrintToConsole() {
 	fmt.Printf("Package Coverage: %.2f%%\n", stats.PackageCoverage)
 	fmt.Printf("File Coverage: %.2f%%\n", stats.FileCoverage)
