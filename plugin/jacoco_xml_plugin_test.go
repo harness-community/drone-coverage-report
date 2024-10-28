@@ -51,6 +51,7 @@ func TestJacocoXmlBadMinimumThreshold(t *testing.T) {
 
 	args := GetTestJacocoXmlNewArgs(envPluginInputArgs)
 	args.ExecFilesPathPattern = reportsPathPattern
+	args.PluginFailOnThreshold = true
 
 	plugin, err := Exec(context.TODO(), args)
 	if err == nil {
@@ -78,6 +79,7 @@ func TestJacocoXmlBadComplexityThreshold(t *testing.T) {
 
 	args := GetTestJacocoXmlNewArgs(envPluginInputArgs)
 	args.ExecFilesPathPattern = reportsPathPattern
+	args.PluginFailOnThreshold = true
 
 	plugin, err := Exec(context.TODO(), args)
 	if err == nil {
