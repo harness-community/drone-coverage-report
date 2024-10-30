@@ -99,6 +99,8 @@ func (c *CoberturaPlugin) AnalyzeCoberturaThresholds() bool {
 		if thresholdCompare.ObservedValue < thresholdCompare.ExpectedValue {
 			pd.LogPrintln(c, "CoberturaPlugin "+thresholdCompare.ThresholdType+" threshold not met",
 				" expected = ", thresholdCompare.ExpectedValue, " observed = ", thresholdCompare.ObservedValue)
+			fmt.Println("Threshold type: "+thresholdCompare.ThresholdType+" threshold not met",
+				" expected = ", thresholdCompare.ExpectedValue, " observed = ", thresholdCompare.ObservedValue)
 			return false
 		}
 	}
