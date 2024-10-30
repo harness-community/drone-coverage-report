@@ -87,21 +87,21 @@ func (jxp *JacocoXmlPlugin) LocateJacocoReportXml() error {
 }
 
 func (jxp *JacocoXmlPlugin) Run() error {
-	pd.LogPrintln(jxp, "Running JacocoXmlPlugin")
+	pd.LogPrintln(jxp, "Running JacocoXmlPlugin with specified thresholds")
 
 	jacocoThresholdValues := GetJacocoCoverageThresholds(jxp.XmlReportCompletePath)
-	pd.LogPrintln(jxp, "Jacoco threshold values: ", jacocoThresholdValues)
+	pd.LogPrintln(jxp, "Retrieved Jacoco threshold values: ", jacocoThresholdValues)
 
 	jxp.JacocoBasePlugin.SetCoverageThresholds(jacocoThresholdValues)
 
-	if jxp.JacocoBasePlugin.InputArgs.PluginFailOnThreshold == false {
+	if !jxp.JacocoBasePlugin.InputArgs.PluginFailOnThreshold {
 		return nil
 	}
 
 	isGood := jxp.JacocoBasePlugin.IsThresholdValuesGood()
 	if !isGood {
-		pd.LogPrintln(jxp, "JacocoXmlPlugin: Coverage thresholds not met")
-		return pd.GetNewError("JacocoXmlPlugin: Coverage thresholds not met")
+		pd.LogPrintln(jxp, "Coverage thresholds not met for JacocoXmlPlugin")
+		return pd.GetNewError("Coverage thresholds not met for JacocoXmlPlugin")
 	}
 
 	return nil

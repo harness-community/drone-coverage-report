@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bmatcuk/doublestar/v4"
 	pd "github.com/harness-community/drone-coverage-report/plugin/plugin_defs"
+	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 )
@@ -99,7 +100,7 @@ func (c *CoberturaPlugin) AnalyzeCoberturaThresholds() bool {
 		if thresholdCompare.ObservedValue < thresholdCompare.ExpectedValue {
 			pd.LogPrintln(c, "CoberturaPlugin "+thresholdCompare.ThresholdType+" threshold not met",
 				" expected = ", thresholdCompare.ExpectedValue, " observed = ", thresholdCompare.ObservedValue)
-			fmt.Printf("Threshold type: %s threshold not met expected = %.2f observed = %.2f\n",
+			logrus.Printf("Threshold type: %s threshold not met expected = %.2f observed = %.2f\n",
 				thresholdCompare.ThresholdType, thresholdCompare.ExpectedValue, thresholdCompare.ObservedValue)
 			return false
 		}
@@ -144,7 +145,13 @@ func (c *CoberturaPlugin) LocateCoberturaCoverageXmlPath() error {
 
 	relativeXmlReportPath := matchedDirs[0]
 
-	c.CompleteCoverageXmlPath = filepath.Join(completeWorkSpaceDir, relativeXmlReportPath)
+	completeXmlPath := filepath.Join(completeWorkSpaceDir, relativeXmlReportPath)
+	_, err = os.Stat(completeXmlPath)
+	if err != nil {
+		return err
+	}
+
+	c.CompleteCoverageXmlPath = completeXmlPath
 
 	return nil
 }

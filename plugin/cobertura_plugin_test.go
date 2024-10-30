@@ -23,7 +23,7 @@ func TestCoberturaGoodThreshold(t *testing.T) {
 	args := GetTestCoberturaNewArgs(envPluginInputArgs)
 	plugin, err := Exec(context.TODO(), args)
 	if err != nil {
-		t.Errorf("Error in TestCoberturaGoodThreshold: %s", err.Error())
+		t.Errorf("Expected passing threshold but got error: %s", err.Error())
 	}
 	_ = plugin
 }
@@ -45,7 +45,7 @@ func TestCoberturaBadThreshold(t *testing.T) {
 	args := GetTestCoberturaNewArgs(envPluginInputArgs)
 	plugin, err := Exec(context.TODO(), args)
 	if err == nil {
-		t.Errorf("Error in TestCoberturaGoodThreshold: %s", err.Error())
+		t.Errorf("Expected failure for high class coverage threshold but test passed: %s", err.Error())
 	}
 	_ = plugin
 }
@@ -68,7 +68,7 @@ func TestCoberturaNoFailOnBadThreshold(t *testing.T) {
 	args.PluginFailOnThreshold = false
 	plugin, err := Exec(context.TODO(), args)
 	if err != nil {
-		t.Errorf("Error in TestCoberturaGoodThreshold: %s", err.Error())
+		t.Errorf("Expected no error due to PluginFailOnThreshold being false, but got: %s", err.Error())
 	}
 	_ = plugin
 }
@@ -130,6 +130,3 @@ func GetTestCoberturaNewArgs(envPluginInputArgs pd.EnvPluginInputArgs) pd.Args {
 	args.ExecFilesPathPattern = "**/coverage.xml"
 	return args
 }
-
-//
-//
