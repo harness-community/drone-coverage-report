@@ -34,7 +34,7 @@ The following settings changes this plugin's behavior.
 
 <br>
 
-Below is an example `.drone.yml` that uses this plugin.
+Below is a **jacoco** tool example `.drone.yml` that uses this plugin.
 
 ```yaml
 step:
@@ -64,6 +64,56 @@ step:
       threshold_class: '0'
 ```
 
+<br>
+
+Below is a **jacoco-xml** tool example `.drone.yml` that uses this plugin.
+
+```yaml
+- step:
+    type: Plugin
+    name: jacoco_xml_sample
+    identifier: jacoco_xml_sample
+    spec:
+      connectorRef: Docker_Hub_Anonymous
+      image: 'plugins/coverage-report'
+      settings:
+        reports_path_pattern: '**/jacoco.xml'
+        threshold_instruction: '20'
+        threshold_branch: '100'
+        threshold_complexity: '75'
+        threshold_line: '20'
+        threshold_method: '20'
+        threshold_class: '20'
+        tool: jacoco-xml
+        fail_on_threshold: 'true'
+```
+
+<br>
+
+Below is a **cobertura** tool example `.drone.yml` that uses this plugin.
+```yaml
+- step:
+    type: Plugin
+    name: cobertura_sample
+    identifier: cobertura_sample
+    spec:
+      connectorRef: Docker_Hub_Anonymous
+      image: 'plugins/coverage-report'
+      settings:
+        reports_path_pattern: '**/coverage.xml'
+        threshold_branch: '0'
+        threshold_class: '40'
+        threshold_line: '5.0'
+        threshold_method: '0'
+        threshold_package: '100'
+        threshold_file: '50.0'
+        threshold_loc: '15'
+        threshold_complexity: '10'
+        threshold_complexity_density: '0.50'
+        fail_on_threshold: 'true'
+        tool: cobertura
+```
+
 # Building
 
 Build the plugin binary:
@@ -89,7 +139,8 @@ DRONE_OUTPUT should be set to "/tmp/drone-output" in non drone environment while
 
 Execute the plugin from your current working directory:
 
-```text
+To test **jacoco** plugin using docker image, run the following command:
+```bash
 
 docker run --rm \
   -e PLUGIN_TOOL='jacoco' \
@@ -115,6 +166,48 @@ docker run --rm \
   -v $(pwd):/drone/src \
 plugins/coverage-report
 ```
+
+<br>
+
+To test **jacoco-xml** plugin using docker image, run the following command:
+```bash
+docker run --rm \
+  -e PLUGIN_TOOL='jacoco-xml' \
+  -e PLUGIN_REPORTS_PATH_PATTERN='**/jacoco.xml' \
+  -e PLUGIN_FAIL_ON_THRESHOLD='true' \
+  -e PLUGIN_THRESHOLD_INSTRUCTION='20' \
+  -e PLUGIN_THRESHOLD_BRANCH='100' \
+  -e PLUGIN_THRESHOLD_COMPLEXITY='75' \
+  -e PLUGIN_THRESHOLD_LINE='20' \
+  -e PLUGIN_THRESHOLD_METHOD='20' \
+  -e PLUGIN_THRESHOLD_CLASS='20' \
+  -e PLUGIN_DRONE_WORKSPACE='/harness' \
+  -e PLUGIN_DRONE_OUTPUT='/tmp/drone-output' \
+plugins/coverage-report
+```
+
+<br>
+
+To test **cobertura** plugin using docker image, run the following command:
+
+```bash
+docker run --rm \
+  -e PLUGIN_TOOL='cobertura' \
+  -e PLUGIN_REPORTS_PATH_PATTERN='**/coverage.xml' \
+  -e PLUGIN_FAIL_ON_THRESHOLD='true' \
+  -e PLUGIN_THRESHOLD_BRANCH='100' \
+  -e PLUGIN_THRESHOLD_COMPLEXITY='75' \
+  -e PLUGIN_THRESHOLD_LINE='20' \
+  -e PLUGIN_THRESHOLD_METHOD='20' \
+  -e PLUGIN_THRESHOLD_CLASS='20' \
+  -e PLUGIN_THRESHOLD_PACKAGE='100' \
+  -e PLUGIN_THRESHOLD_FILE='50.0' \
+  -e PLUGIN_DRONE_WORKSPACE='/harness' \
+  -e PLUGIN_DRONE_OUTPUT='/tmp/drone-output' \
+plugins/coverage-report
+```
+
+<br>
 
 Unit test should be run using
 ```shell

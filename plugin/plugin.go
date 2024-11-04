@@ -6,6 +6,7 @@ package plugin
 
 import (
 	"context"
+	cb "github.com/harness-community/drone-coverage-report/plugin/cobertura"
 	jc "github.com/harness-community/drone-coverage-report/plugin/jacoco"
 	pd "github.com/harness-community/drone-coverage-report/plugin/plugin_defs"
 )
@@ -18,6 +19,12 @@ func GetNewPlugin(ctx context.Context, args pd.Args) (pd.Plugin, error) {
 	case pd.JacocoPluginType:
 		jcp := jc.GetNewJacocoPlugin()
 		return &jcp, nil
+	case pd.JacocoXmlPluginType:
+		jcxp := jc.GetNewJacocoXmlPlugin()
+		return &jcxp, nil
+	case pd.CoberturaPluginType:
+		cp := cb.GetNewCoberturaPlugin()
+		return &cp, nil
 
 	default:
 		return nil, pd.GetNewError("Unknown plugin type: " + pluginToolType)

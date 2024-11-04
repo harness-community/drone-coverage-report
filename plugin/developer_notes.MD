@@ -86,5 +86,12 @@ PLUGIN_THRESHOLD_METHOD='0' \
 PLUGIN_THRESHOLD_CLASS='0' \
 DRONE_WORKSPACE='/opt/hns/test-resources/game-of-life-master' \
 ./drone-coverage-report
-
 ```
+
+# Generate cobertura report
+
+```bash
+cd <project-dir> # this should contains the pom.xml
+mvn clean cobertura:cobertura
+```
+
