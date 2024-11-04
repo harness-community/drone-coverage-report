@@ -209,10 +209,31 @@ plugins/coverage-report
 
 <br>
 
-Unit test should be run using
-```shell
-DRONE_OUTPUT=/tmp/drone-output go test ./...
-```
+### Output variables set for JaCoCo and JaCoCo XML
+
+| Parameter             | Description                                                                                  |
+|-----------------------|----------------------------------------------------------------------------------------------|
+| `INSTRUCTION_COVERAGE` | Ratio of executed bytecode instructions over the total instructions calculated as percentage |
+| `BRANCH_COVERAGE`     | Percentage of branches executed in conditional statements (like if, else).                   |
+| `LINE_COVERAGE`       | Ratio of code lines executed over the total lines, calculated as percentage                  |
+| `METHOD_COVERAGE`     | Ratio of methods covered by tests over the total methods, calculated as percentage           |
+| `CLASS_COVERAGE`      | Ratio of classes covered by tests over the total classes, calculated as percentage           |
+| `COMPLEXITY_COVERAGE` | Measures code complexity based on control flow paths and the Cyclomatic Complexity metric.   |
+
+### Output variables set for Cobertura
+
+| Parameter             | Description                                                                                |
+|-----------------------|--------------------------------------------------------------------------------------------|
+| `BRANCH_COVERAGE`     | Percentage of branches executed in conditional statements (like if, else).                 |
+| `LINE_COVERAGE`       | Ratio of code lines executed over the total lines, calculated as percentage                |
+| `COMPLEXITY_COVERAGE` | Measures code complexity based on control flow paths and the Cyclomatic Complexity metric. |
+| `METHOD_COVERAGE`     | Ratio of methods covered by tests over total methods, calculated as percentage             |
+| `CLASS_COVERAGE`      | Ratio of classes covered by tests over total classes, calculated as percentage             |
+| `FILE_COVERAGE`       | Coverage at the file level, indicating the extent to which each file is covered by tests.  |
+| `PACKAGE_COVERAGE`    | Ratio of packages covered by tests over total coverage, calculated as percentage           |
+| `COMPLEXITY_DENSITY`  | Ratio of complexity to lines of code, showing average complexity across the codebase.      |
+| `LOC`                 | Lines of Code, indicating the total number of lines in the codebase.                       |
+
 
 # Supported arch and os
 This plugin can only be run on linux amd64/arm64. Windows build not supported.
