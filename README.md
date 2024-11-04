@@ -209,7 +209,7 @@ plugins/coverage-report
 
 <br>
 
-### Output variables set for JaCoCo and JaCoCo XML
+### Output Env variables set for JaCoCo and JaCoCo XML
 
 | Parameter             | Description                                                                                  |
 |-----------------------|----------------------------------------------------------------------------------------------|
@@ -220,7 +220,7 @@ plugins/coverage-report
 | `CLASS_COVERAGE`      | Ratio of classes covered by tests over the total classes, calculated as percentage           |
 | `COMPLEXITY_COVERAGE` | Measures code complexity based on control flow paths and the Cyclomatic Complexity metric.   |
 
-### Output variables set for Cobertura
+### Output Env variables set for Cobertura
 
 | Parameter             | Description                                                                                |
 |-----------------------|--------------------------------------------------------------------------------------------|
