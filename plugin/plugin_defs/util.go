@@ -578,9 +578,6 @@ func CreateDir(absolutePath string) error {
 }
 
 func GetOutputVariablesStorageFilePath() string {
-	if IsDevTestingMode() {
-		return filepath.Join("/tmp", "drone-output")
-	}
 	return os.Getenv("DRONE_OUTPUT")
 }
 
@@ -595,7 +592,7 @@ func ReadFileAsString(filePath string) (string, error) {
 func WriteEnvVariableAsString(key string, value interface{}) error {
 
 	if GetOutputVariablesStorageFilePath() == "" {
-		return GetNewError("Output file path is empty, check env var DRONE_OUTPUT")
+		return nil
 	}
 
 	outputFile, err := os.OpenFile(GetOutputVariablesStorageFilePath(), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)

@@ -513,7 +513,7 @@ func (p *JacocoPlugin) Run() error {
 
 func (p *JacocoPlugin) AnalyzeJacocoCoverageThresholds() error {
 
-	if p.PluginFailIfNoReports {
+	if p.InputArgs.PluginFailIfNoReports {
 		_, err := os.Stat(p.GetJacocoXmlReportFilePath())
 		if err != nil {
 			pd.LogPrintln(p, "JacocoPlugin Error in AnalyzeJacocoCoverageThresholds: "+err.Error())
@@ -527,8 +527,7 @@ func (p *JacocoPlugin) AnalyzeJacocoCoverageThresholds() error {
 	}
 
 	p.CoverageThresholds = GetJacocoCoverageThresholds(p.GetJacocoXmlReportFilePath())
-
-	if p.PluginFailOnThreshold == false {
+	if p.InputArgs.PluginFailOnThreshold == false {
 		pd.LogPrintln(p, "JacocoPlugin PluginFailOnThreshold is false, so skipping threshold check")
 		return nil
 	}
