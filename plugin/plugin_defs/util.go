@@ -236,16 +236,7 @@ func (i *IncludeExcludesMerged) GetAllUniqueDirsForSource1(toDstPathPrefix, buil
 	for _, prefixWithPath := range i.CompletePathsWithPrefixList {
 		prefix := prefixWithPath.CompletePathPrefix
 		relPath := prefixWithPath.RelativePath
-
-		fmt.Println("DDDDDDDDDDDDDDDDDDDd")
-		fmt.Println(prefix)
-		fmt.Println(relPath)
-
 		srcPath := filepath.Join(prefix, relPath)
-
-		fmt.Println("SSSSSSSSSSSSSS")
-		fmt.Println(srcPath)
-
 		sourcePathDir := getSrcDir(filepath.Dir(srcPath))
 
 		fmt.Println(sourcePathDir)
@@ -262,9 +253,6 @@ func (i *IncludeExcludesMerged) GetAllUniqueDirsForSource1(toDstPathPrefix, buil
 		uniqueDirs = append(uniqueDirs, dir)
 	}
 
-	fmt.Println("$$$$$$$$$$$$")
-	fmt.Println(uniqueDirs)
-
 	return uniqueDirs
 }
 
@@ -279,23 +267,6 @@ func (i *IncludeExcludesMerged) GetAllUniqueDirsForSource(toDstPathPrefix, build
 		_ = prefix
 		newDir := filepath.Dir(filepath.Join(toDstPathPrefix, relPath))
 		sourceFilesDirMap[newDir] = true
-		//
-		//srcPath := filepath.Join(prefix, relPath)
-		//pos := strings.Index(srcPath, buildRootPath)
-		//if pos == -1 {
-		//	LogPrintln(nil, "Target not found in the path")
-		//	continue
-		//}
-		//
-		//if pos == 0 {
-		//	skipLen := len(buildRootPath)
-		//	tmpFilePath := srcPath[skipLen:]
-		//	dstFile := filepath.Join(toDstPathPrefix, tmpFilePath)
-		//
-		//	dirPath := filepath.Dir(dstFile)
-		//	sourceFilesDirMap[dirPath] = true
-		//}
-
 	}
 
 	var uniqueDirs []string
